@@ -8,6 +8,7 @@ import AdDataForm from "./AdDataForm";
 import AdTrendChart from "./AdTrendChart";
 import ScoreBadge from "./ScoreBadge";
 import { ChartBar, Calendar, ArrowUp, ArrowDown } from "lucide-react";
+import AdDataCalendar from "./AdDataCalendar";
 
 interface OfferDetailsProps {
   offer: Offer;
@@ -100,6 +101,16 @@ const OfferDetails = ({ offer, onBack, onUpdateAdData }: OfferDetailsProps) => {
                   )}
                 </div>
               </div>
+            </CardContent>
+          </Card>
+          
+          {/* Add the calendar view */}
+          <Card className="border border-gray-800 card-gradient">
+            <CardHeader>
+              <CardTitle className="text-base">Histórico por Data</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <AdDataCalendar adData={offer.adData} />
             </CardContent>
           </Card>
           

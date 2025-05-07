@@ -2,6 +2,7 @@
 export interface AdData {
   date: string;
   activeAds: number;
+  trend?: number; // Percentage change from previous day
 }
 
 export interface Offer {
