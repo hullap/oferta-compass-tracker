@@ -20,3 +20,9 @@ export interface Score {
   label: string;
   result: ScoreResult;
 }
+
+export interface TrendInfo {
+  direction: "up" | "down" | "stable";
+  percentage: number;
+}
+

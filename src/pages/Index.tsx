@@ -48,23 +48,22 @@ const Index = () => {
   };
 
   // Handler para atualizar os dados de anúncios de uma oferta
-  const handleUpdateAdData = (offerId: string, activeAds: number) => {
-    const today = new Date().toISOString().split('T')[0];
-    
+  const handleUpdateAdData = (offerId: string, activeAds: number, date: string = new Date().toISOString().split('T')[0]) => {
     setOffers(prev => prev.map(offer => {
       if (offer.id !== offerId) return offer;
       
-      // Verifica se já existe um registro para hoje
-      const existingTodayIndex = offer.adData.findIndex(data => data.date.startsWith(today));
+      // Verifica se já existe um registro para a data informada
+      const existingDateIndex = offer.adData.findIndex(data => data.date.startsWith(date));
       
       let updatedAdData;
-      if (existingTodayIndex >= 0) {
+      if (existingDateIndex >= 0) {
         // Atualiza o registro existente
         updatedAdData = [...offer.adData];
-        updatedAdData[existingTodayIndex] = { date: today, activeAds };
+        updatedAdData[existingDateIndex] = { date, activeAds };
       } else {
-        // Adiciona novo registro
-        updatedAdData = [...offer.adData, { date: today, activeAds }];
+        // Adiciona novo registro e ordena por data
+        updatedAdData = [...offer.adData, { date, activeAds }]
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
       }
       
       // Atualiza o objeto da oferta
@@ -79,9 +78,33 @@ const Index = () => {
     if (selectedOffer && selectedOffer.id === offerId) {
       const updatedOffer = offers.find(o => o.id === offerId);
       if (updatedOffer) {
-        setSelectedOffer(updatedOffer);
+        setSelectedOffer(current => {
+          if (!current) return null;
+          
+          // Verifica se já existe um registro para a data informada
+          const existingDateIndex = current.adData.findIndex(data => data.date.startsWith(date));
+          
+          let updatedAdData;
+          if (existingDateIndex >= 0) {
+            // Atualiza o registro existente
+            updatedAdData = [...current.adData];
+            updatedAdData[existingDateIndex] = { date, activeAds };
+          } else {
+            // Adiciona novo registro e ordena por data
+            updatedAdData = [...current.adData, { date, activeAds }]
+              .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+          }
+          
+          return {
+            ...current,
+            adData: updatedAdData,
+            updatedAt: new Date().toISOString()
+          };
+        });
       }
     }
+    
+    toast.success("Dados atualizados com sucesso!");
   };
 
   return (

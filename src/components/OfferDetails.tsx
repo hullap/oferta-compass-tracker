@@ -4,7 +4,6 @@ import { calculateScore } from "@/services/scoreService";
 import { Offer } from "@/types/offer";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Separator } from "./ui/separator";
 import AdDataForm from "./AdDataForm";
 import AdTrendChart from "./AdTrendChart";
 import ScoreBadge from "./ScoreBadge";
@@ -13,7 +12,7 @@ import { ChartBar, Calendar, ArrowUp, ArrowDown } from "lucide-react";
 interface OfferDetailsProps {
   offer: Offer;
   onBack: () => void;
-  onUpdateAdData: (offerId: string, activeAds: number) => void;
+  onUpdateAdData: (offerId: string, activeAds: number, date: string) => void;
 }
 
 const OfferDetails = ({ offer, onBack, onUpdateAdData }: OfferDetailsProps) => {

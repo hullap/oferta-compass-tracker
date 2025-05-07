@@ -1,5 +1,5 @@
 
-import { Offer, Score, ScoreResult } from "@/types/offer";
+import { Offer, Score, ScoreResult, TrendInfo } from "@/types/offer";
 
 // Função para calcular score com base na matriz de decisão
 export const calculateScore = (offer: Offer): Score => {
@@ -63,6 +63,44 @@ export const calculateScore = (offer: Offer): Score => {
   }
   
   return { value: score, label, result };
+};
+
+// Função para calcular a tendência da oferta (para exibição no card)
+export const calculateTrend = (offer: Offer): TrendInfo => {
+  const adData = offer.adData;
+  
+  // Se não houver dados suficientes, retorna uma tendência estável
+  if (!adData || adData.length < 2) {
+    return { direction: "stable", percentage: 0 };
+  }
+  
+  // Ordena os dados por data para garantir a sequência correta
+  const sortedData = [...adData].sort((a, b) => 
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+  
+  // Pega os dois dados mais recentes
+  const latest = sortedData[sortedData.length - 1].activeAds;
+  const previous = sortedData[sortedData.length - 2].activeAds;
+  
+  // Calcula a diferença percentual
+  if (previous === 0) {
+    return latest > 0 ? { direction: "up", percentage: 100 } : { direction: "stable", percentage: 0 };
+  }
+  
+  const percentChange = ((latest - previous) / previous) * 100;
+  
+  // Define a direção com base na variação percentual
+  let direction: "up" | "down" | "stable" = "stable";
+  
+  if (Math.abs(percentChange) >= 5) { // Considera uma variação significativa se for >= 5%
+    direction = percentChange > 0 ? "up" : "down";
+  }
+  
+  return {
+    direction,
+    percentage: percentChange
+  };
 };
 
 // Calcula o índice de consistência (0-1) onde menor é melhor
