@@ -13,9 +13,9 @@ import {
   Archive,
   Trash2,
   MoreVertical,
-  Tag,
   MessageSquare,
-  Link
+  Link,
+  ExternalLink
 } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "./ui/button";
@@ -60,10 +60,10 @@ const OfferCard = ({
   
   // Determina a cor da tendência
   const trendColor = trend.direction === 'up' 
-    ? 'text-score-high' 
+    ? 'text-emerald-400' 
     : trend.direction === 'down' 
-      ? 'text-score-low' 
-      : 'text-muted-foreground';
+      ? 'text-red-400' 
+      : 'text-slate-400';
 
   // Check if there are any observations
   const hasObservations = useMemo(() => {
@@ -81,26 +81,28 @@ const OfferCard = ({
   return (
     <Card 
       className={cn(
-        "overflow-hidden transition-all duration-300 hover:shadow-md card-gradient border border-gray-800",
-        isPinned && "border-primary border-2",
-        isArchived && "opacity-60"
+        "overflow-hidden transition-all duration-300 hover:shadow-lg bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 group",
+        isPinned && "border-blue-500 shadow-blue-900/20 shadow-md",
+        isArchived && "opacity-60",
+        "hover:transform hover:scale-[1.02] hover:shadow-xl"
       )}
+      onClick={() => onClick(offer)}
     >
-      <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
+      <CardHeader className="flex flex-row items-center justify-between p-4 pb-2 border-b border-slate-700/40">
         <div className="flex-1 pr-2">
-          <h3 className="font-bold flex items-center gap-1.5">
-            {isPinned && <Pin size={14} className="text-primary" />}
-            {isFavorite && <Star size={14} className="text-yellow-500 fill-yellow-500" />}
+          <h3 className="font-bold flex items-center gap-1.5 text-slate-100 group-hover:text-white truncate">
+            {isPinned && <Pin size={14} className="text-blue-400 flex-shrink-0" />}
+            {isFavorite && <Star size={14} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />}
             {offer.name}
           </h3>
-          <p className="text-xs text-muted-foreground line-clamp-1">{offer.description}</p>
+          <p className="text-xs text-slate-400 group-hover:text-slate-300 line-clamp-1 mt-0.5">{offer.description}</p>
           {offer.facebookAdLibraryUrl && (
             <div 
-              className="text-xs text-primary flex items-center gap-1 mt-1 cursor-pointer hover:underline"
+              className="text-xs text-blue-400 flex items-center gap-1 mt-1.5 cursor-pointer hover:text-blue-300 hover:underline transition-colors"
               onClick={openAdLibraryUrl}
             >
-              <Link size={12} />
-              <span className="truncate">Biblioteca de anúncios</span>
+              <ExternalLink size={12} />
+              <span className="truncate">Biblioteca de Anúncios</span>
             </div>
           )}
         </div>
@@ -108,34 +110,40 @@ const OfferCard = ({
           <ScoreBadge score={score} size="sm" />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
+              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-800 rounded-full">
                 <MoreVertical size={16} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44">
+            <DropdownMenuContent align="end" className="w-44 border-slate-700 bg-slate-900">
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 onPin && onPin(offer);
-              }}>
+              }}
+              className="hover:bg-slate-800 focus:bg-slate-800"
+              >
                 <Pin className="mr-2 h-4 w-4" />
                 {isPinned ? "Desafixar" : "Fixar"}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 onFavorite && onFavorite(offer);
-              }}>
+              }}
+              className="hover:bg-slate-800 focus:bg-slate-800"
+              >
                 <Star className="mr-2 h-4 w-4" />
                 {isFavorite ? "Remover favorito" : "Favoritar"}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 onArchive && onArchive(offer);
-              }}>
+              }}
+              className="hover:bg-slate-800 focus:bg-slate-800"
+              >
                 <Archive className="mr-2 h-4 w-4" />
                 {isArchived ? "Desarquivar" : "Arquivar"}
               </DropdownMenuItem>
               <DropdownMenuItem 
-                className="text-destructive" 
+                className="text-red-400 hover:text-red-300 hover:bg-slate-800 focus:bg-slate-800" 
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete && onDelete(offer);
@@ -148,10 +156,10 @@ const OfferCard = ({
           </DropdownMenu>
         </div>
       </CardHeader>
-      <CardContent className="p-4 pt-2">
-        <div className="flex justify-between items-center text-xs mt-4 mb-3 bg-glass rounded-lg p-2.5">
-          <div className="font-medium">Anúncios ativos</div>
-          <div className="flex items-center font-bold">
+      <CardContent className="p-4 pt-3">
+        <div className="flex justify-between items-center text-xs mt-3 mb-3 bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
+          <div className="font-medium text-slate-300">Anúncios ativos</div>
+          <div className="flex items-center font-bold text-white">
             {latestAds}
             {trend.direction !== 'stable' && (
               <span className={`ml-1.5 ${trendColor} flex items-center`}>
@@ -172,30 +180,33 @@ const OfferCard = ({
         </div>
         
         {offer.totalPageAds !== undefined && offer.totalPageAds > 0 && (
-          <div className="flex justify-between items-center text-xs mb-3 bg-glass rounded-lg p-2.5">
-            <div className="font-medium">Total anúncios da página</div>
-            <div className="font-bold">{offer.totalPageAds}</div>
+          <div className="flex justify-between items-center text-xs mb-3 bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
+            <div className="font-medium text-slate-300">Total anúncios da página</div>
+            <div className="font-bold text-emerald-400">{offer.totalPageAds}</div>
           </div>
         )}
         
-        <div className="flex flex-wrap gap-1 my-3">
+        <div className="flex flex-wrap gap-1.5 my-3 min-h-[26px]">
           {(offer.keywords || []).slice(0, 3).map((keyword, index) => (
             <Badge 
               key={index}
               variant="outline" 
-              className="text-xs py-0"
+              className="text-xs py-0.5 bg-blue-900/20 text-blue-300 border-blue-700/50 hover:bg-blue-800/30"
             >
               {keyword}
             </Badge>
           ))}
           {(offer.keywords || []).length > 3 && (
-            <Badge variant="outline" className="text-xs py-0">
+            <Badge 
+              variant="outline" 
+              className="text-xs py-0.5 bg-purple-900/20 text-purple-300 border-purple-700/50"
+            >
               +{(offer.keywords || []).length - 3}
             </Badge>
           )}
         </div>
         
-        <div className="flex justify-between items-center text-xs text-muted-foreground mt-3">
+        <div className="flex justify-between items-center text-xs text-slate-400 mt-3">
           <div className="flex gap-2">
             <div className="flex items-center gap-1">
               <ChartLine size={14} className="opacity-70" />
@@ -215,8 +226,7 @@ const OfferCard = ({
         
         <Button 
           variant="outline" 
-          className="w-full mt-4 border-gray-700" 
-          onClick={() => onClick(offer)}
+          className="w-full mt-4 border-slate-700 hover:bg-slate-800 hover:border-slate-600 transition-all hover:text-white bg-gradient-to-br from-slate-800 to-slate-900" 
         >
           Ver detalhes
         </Button>
