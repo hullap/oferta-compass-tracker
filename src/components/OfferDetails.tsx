@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import AdDataForm from "./AdDataForm";
 import AdTrendChart from "./AdTrendChart";
 import ScoreBadge from "./ScoreBadge";
-import { ChartBar, Calendar, ArrowUp, ArrowDown, Edit2, MessageSquare, Tag } from "lucide-react";
+import { ChartBar, Calendar, ArrowUp, ArrowDown, Edit2, MessageSquare, Tag, Link } from "lucide-react";
 import AdDataCalendar from "./AdDataCalendar";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -22,6 +22,7 @@ interface OfferDetailsProps {
   onUpdateAdData: (offerId: string, activeAds: number, date: string, observation: string) => void;
   onUpdateTotalPageAds?: (offerId: string, totalPageAds: number) => void;
   onUpdateKeywords?: (offerId: string, keywords: string[]) => void;
+  onUpdateFacebookAdLibraryUrl?: (offerId: string, url: string) => void;
 }
 
 const OfferDetails = ({ 
@@ -29,12 +30,14 @@ const OfferDetails = ({
   onBack, 
   onUpdateAdData,
   onUpdateTotalPageAds,
-  onUpdateKeywords
+  onUpdateKeywords,
+  onUpdateFacebookAdLibraryUrl
 }: OfferDetailsProps) => {
   const [editingObservation, setEditingObservation] = useState<{index: number, value: string} | null>(null);
   const [totalPageAds, setTotalPageAds] = useState(offer.totalPageAds?.toString() || "");
   const [newKeyword, setNewKeyword] = useState("");
   const [keywords, setKeywords] = useState<string[]>(offer.keywords || []);
+  const [facebookAdLibraryUrl, setFacebookAdLibraryUrl] = useState(offer.facebookAdLibraryUrl || "");
   
   const score = useMemo(() => calculateScore(offer), [offer]);
   
@@ -79,6 +82,13 @@ const OfferDetails = ({
     onUpdateTotalPageAds(offer.id, count);
   };
   
+  // Save Facebook Ad Library URL
+  const handleSaveFacebookAdLibraryUrl = () => {
+    if (!onUpdateFacebookAdLibraryUrl) return;
+    
+    onUpdateFacebookAdLibraryUrl(offer.id, facebookAdLibraryUrl);
+  };
+  
   // Add keyword
   const addKeyword = () => {
     if (!newKeyword.trim() || !onUpdateKeywords) return;
@@ -103,6 +113,13 @@ const OfferDetails = ({
     onUpdateKeywords(offer.id, updatedKeywords);
   };
   
+  // Open Facebook Ad Library URL in new tab
+  const openAdLibraryUrl = () => {
+    if (offer.facebookAdLibraryUrl) {
+      window.open(offer.facebookAdLibraryUrl, '_blank');
+    }
+  };
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -114,6 +131,16 @@ const OfferDetails = ({
       </div>
       
       <p className="text-muted-foreground">{offer.description}</p>
+      
+      {offer.facebookAdLibraryUrl && (
+        <div 
+          className="text-primary flex items-center gap-2 cursor-pointer hover:underline"
+          onClick={openAdLibraryUrl}
+        >
+          <Link size={16} />
+          <span>Ver no Facebook Ad Library</span>
+        </div>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="border border-gray-800 card-gradient col-span-1 md:col-span-2">
@@ -274,6 +301,24 @@ const OfferDetails = ({
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Registre aqui o número total de anúncios ativos da página, independente da oferta específica.
+                  </p>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="facebookAdLibraryUrl">Link da biblioteca de anúncios</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="facebookAdLibraryUrl"
+                      type="url"
+                      placeholder="URL da biblioteca de anúncios do Facebook"
+                      value={facebookAdLibraryUrl}
+                      onChange={(e) => setFacebookAdLibraryUrl(e.target.value)}
+                      className="border-gray-700"
+                    />
+                    <Button onClick={handleSaveFacebookAdLibraryUrl}>Salvar</Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Insira o link da biblioteca de anúncios do Facebook para acessar rapidamente.
                   </p>
                 </div>
               </div>

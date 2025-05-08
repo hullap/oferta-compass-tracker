@@ -14,7 +14,8 @@ import {
   Trash2,
   MoreVertical,
   Tag,
-  MessageSquare
+  MessageSquare,
+  Link
 } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "./ui/button";
@@ -69,6 +70,14 @@ const OfferCard = ({
     return offer.adData.some(data => data.observation && data.observation.trim() !== "");
   }, [offer.adData]);
   
+  // Open Facebook Ad Library URL in new tab
+  const openAdLibraryUrl = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (offer.facebookAdLibraryUrl) {
+      window.open(offer.facebookAdLibraryUrl, '_blank');
+    }
+  };
+  
   return (
     <Card 
       className={cn(
@@ -85,6 +94,15 @@ const OfferCard = ({
             {offer.name}
           </h3>
           <p className="text-xs text-muted-foreground line-clamp-1">{offer.description}</p>
+          {offer.facebookAdLibraryUrl && (
+            <div 
+              className="text-xs text-primary flex items-center gap-1 mt-1 cursor-pointer hover:underline"
+              onClick={openAdLibraryUrl}
+            >
+              <Link size={12} />
+              <span className="truncate">Biblioteca de anúncios</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <ScoreBadge score={score} size="sm" />

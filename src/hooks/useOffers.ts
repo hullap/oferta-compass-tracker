@@ -67,6 +67,7 @@ export const useOffers = () => {
             pageName: offer.page_name || "",
             totalPageAds: offer.total_page_ads || 0,
             keywords: offer.keywords || [],
+            facebookAdLibraryUrl: offer.facebook_ad_library_url || "",
             createdAt: offer.created_at,
             updatedAt: offer.updated_at
           };
@@ -105,7 +106,7 @@ export const useOffers = () => {
   };
   
   // Add new offer
-  const addOffer = async (name: string, description: string, pageId: string = "", pageName: string = "", keywords: string[] = []) => {
+  const addOffer = async (name: string, description: string, pageId: string = "", pageName: string = "", keywords: string[] = [], facebookAdLibraryUrl: string = "") => {
     if (!user) return;
     
     try {
@@ -118,7 +119,8 @@ export const useOffers = () => {
             user_id: user.id,
             page_id: pageId,
             page_name: pageName,
-            keywords 
+            keywords,
+            facebook_ad_library_url: facebookAdLibraryUrl
           }
         ])
         .select()
@@ -135,6 +137,7 @@ export const useOffers = () => {
         pageName: data.page_name || "",
         totalPageAds: data.total_page_ads || 0,
         keywords: data.keywords || [],
+        facebookAdLibraryUrl: data.facebook_ad_library_url || "",
         createdAt: data.created_at,
         updatedAt: data.updated_at
       };
@@ -146,6 +149,41 @@ export const useOffers = () => {
       console.error("Error adding offer:", error);
       toast.error("Erro ao criar oferta");
       return null;
+    }
+  };
+  
+  // Update Facebook Ad Library URL
+  const updateFacebookAdLibraryUrl = async (offerId: string, url: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from("offers")
+        .update({ 
+          facebook_ad_library_url: url,
+          updated_at: new Date().toISOString() 
+        })
+        .eq("id", offerId);
+        
+      if (error) throw error;
+      
+      // Update offers state
+      setOffers(prevOffers => {
+        return prevOffers.map(offer => {
+          if (offer.id !== offerId) return offer;
+          
+          return {
+            ...offer,
+            facebookAdLibraryUrl: url,
+            updatedAt: new Date().toISOString()
+          };
+        });
+      });
+      
+      toast.success("URL da biblioteca de anúncios atualizada!");
+    } catch (error: any) {
+      console.error("Error updating Facebook Ad Library URL:", error);
+      toast.error("Erro ao atualizar URL");
     }
   };
   
@@ -410,34 +448,34 @@ export const useOffers = () => {
   };
   
   // Delete an offer
-  const deleteOffer = async (offerId: string) => {
+  const deleteOffer = async (offer: Offer) => {
     if (!user) return;
     
     try {
       const { error } = await supabase
         .from("offers")
         .delete()
-        .eq("id", offerId);
+        .eq("id", offer.id);
         
       if (error) throw error;
       
       // Update local state
-      setOffers(prev => prev.filter(offer => offer.id !== offerId));
+      setOffers(prev => prev.filter(o => o.id !== offer.id));
       
       // Remove from preferences
       setPinnedOffers(prev => {
         const updated = new Set(prev);
-        updated.delete(offerId);
+        updated.delete(offer.id);
         return updated;
       });
       setFavoriteOffers(prev => {
         const updated = new Set(prev);
-        updated.delete(offerId);
+        updated.delete(offer.id);
         return updated;
       });
       setArchivedOffers(prev => {
         const updated = new Set(prev);
-        updated.delete(offerId);
+        updated.delete(offer.id);
         return updated;
       });
       
@@ -522,6 +560,7 @@ export const useOffers = () => {
     updateAdData,
     updateTotalPageAds,
     updateKeywords,
+    updateFacebookAdLibraryUrl,
     pinOffer: (offer: Offer) => updatePreference(offer.id, 'pin', !pinnedOffers.has(offer.id)),
     favoriteOffer: (offer: Offer) => updatePreference(offer.id, 'favorite', !favoriteOffers.has(offer.id)),
     archiveOffer: (offer: Offer) => updatePreference(offer.id, 'archive', !archivedOffers.has(offer.id)),

@@ -15,6 +15,7 @@ export type Database = {
           created_at: string
           date: string
           id: string
+          observation: string | null
           offer_id: string
           updated_at: string
         }
@@ -23,6 +24,7 @@ export type Database = {
           created_at?: string
           date: string
           id?: string
+          observation?: string | null
           offer_id: string
           updated_at?: string
         }
@@ -31,6 +33,7 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          observation?: string | null
           offer_id?: string
           updated_at?: string
         }
@@ -48,24 +51,39 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          facebook_ad_library_url: string | null
           id: string
+          keywords: string[] | null
           name: string
+          page_id: string | null
+          page_name: string | null
+          total_page_ads: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
           description?: string | null
+          facebook_ad_library_url?: string | null
           id?: string
+          keywords?: string[] | null
           name: string
+          page_id?: string | null
+          page_name?: string | null
+          total_page_ads?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
           description?: string | null
+          facebook_ad_library_url?: string | null
           id?: string
+          keywords?: string[] | null
           name?: string
+          page_id?: string | null
+          page_name?: string | null
+          total_page_ads?: number | null
           updated_at?: string
           user_id?: string
         }

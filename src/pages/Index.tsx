@@ -40,6 +40,7 @@ const Index = () => {
     updateAdData,
     updateTotalPageAds,
     updateKeywords,
+    updateFacebookAdLibraryUrl,
     pinOffer,
     favoriteOffer,
     archiveOffer,
@@ -88,8 +89,8 @@ const Index = () => {
   });
 
   // Handler para adicionar uma nova oferta
-  const handleAddOffer = async (name: string, description: string) => {
-    await addOffer(name, description);
+  const handleAddOffer = async (name: string, description: string, facebookAdLibraryUrl: string = "") => {
+    await addOffer(name, description, "", "", [], facebookAdLibraryUrl);
     setIsCreatingOffer(false);
   };
 
@@ -113,6 +114,7 @@ const Index = () => {
             onUpdateAdData={updateAdData}
             onUpdateTotalPageAds={updateTotalPageAds}
             onUpdateKeywords={updateKeywords}
+            onUpdateFacebookAdLibraryUrl={updateFacebookAdLibraryUrl}
           />
         ) : (
           <div className="space-y-6">

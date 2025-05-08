@@ -8,13 +8,14 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "./ui/card"
 import { toast } from "sonner";
 
 interface NewOfferFormProps {
-  onSubmit: (name: string, description: string) => void;
+  onSubmit: (name: string, description: string, facebookAdLibraryUrl: string) => void;
   onCancel: () => void;
 }
 
 const NewOfferForm = ({ onSubmit, onCancel }: NewOfferFormProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [facebookAdLibraryUrl, setFacebookAdLibraryUrl] = useState("");
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,9 +25,10 @@ const NewOfferForm = ({ onSubmit, onCancel }: NewOfferFormProps) => {
       return;
     }
     
-    onSubmit(name.trim(), description.trim());
+    onSubmit(name.trim(), description.trim(), facebookAdLibraryUrl.trim());
     setName("");
     setDescription("");
+    setFacebookAdLibraryUrl("");
   };
   
   return (
@@ -56,6 +58,20 @@ const NewOfferForm = ({ onSubmit, onCancel }: NewOfferFormProps) => {
               placeholder="Breve descrição da oferta..."
               className="resize-none h-20 border-gray-700"
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="facebookAdLibraryUrl">Link da Biblioteca de Anúncios</Label>
+            <Input
+              id="facebookAdLibraryUrl"
+              type="url"
+              value={facebookAdLibraryUrl}
+              onChange={(e) => setFacebookAdLibraryUrl(e.target.value)}
+              placeholder="URL da biblioteca de anúncios do Facebook"
+              className="border-gray-700"
+            />
+            <p className="text-xs text-muted-foreground">
+              URL da página do Facebook Ad Library para esta oferta (opcional)
+            </p>
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">

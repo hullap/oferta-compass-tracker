@@ -15,6 +15,7 @@ export interface Offer {
   pageName?: string; // Name of the Facebook page
   totalPageAds?: number; // Total ads count for the page (regardless of offer)
   keywords?: string[]; // Keywords used to find the offer
+  facebookAdLibraryUrl?: string; // URL to the Facebook Ad Library for this offer
   createdAt: string;
   updatedAt: string;
 }
@@ -41,6 +42,7 @@ export interface DatabaseOffer {
   page_name?: string;
   total_page_ads?: number;
   keywords?: string[];
+  facebook_ad_library_url?: string;
   created_at: string;
   updated_at: string;
 }
