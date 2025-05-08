@@ -43,7 +43,8 @@ export const useOffers = () => {
           // Transform ad_data to match the AdData type
           const transformedAdData: AdData[] = adData.map(item => ({
             date: item.date,
-            activeAds: item.active_ads
+            activeAds: item.active_ads,
+            observation: item.observation || ""
           }));
           
           // Calculate trends for each day
@@ -62,6 +63,10 @@ export const useOffers = () => {
             name: offer.name,
             description: offer.description || "",
             adData: transformedAdData,
+            pageId: offer.page_id || "",
+            pageName: offer.page_name || "",
+            totalPageAds: offer.total_page_ads || 0,
+            keywords: offer.keywords || [],
             createdAt: offer.created_at,
             updatedAt: offer.updated_at
           };
@@ -100,14 +105,21 @@ export const useOffers = () => {
   };
   
   // Add new offer
-  const addOffer = async (name: string, description: string) => {
+  const addOffer = async (name: string, description: string, pageId: string = "", pageName: string = "", keywords: string[] = []) => {
     if (!user) return;
     
     try {
       const { data, error } = await supabase
         .from("offers")
         .insert([
-          { name, description, user_id: user.id }
+          { 
+            name, 
+            description, 
+            user_id: user.id,
+            page_id: pageId,
+            page_name: pageName,
+            keywords 
+          }
         ])
         .select()
         .single();
@@ -119,6 +131,10 @@ export const useOffers = () => {
         name: data.name,
         description: data.description || "",
         adData: [],
+        pageId: data.page_id || "",
+        pageName: data.page_name || "",
+        totalPageAds: data.total_page_ads || 0,
+        keywords: data.keywords || [],
         createdAt: data.created_at,
         updatedAt: data.updated_at
       };
@@ -134,7 +150,7 @@ export const useOffers = () => {
   };
   
   // Update ad data for an offer
-  const updateAdData = async (offerId: string, activeAds: number, date: string = new Date().toISOString().split('T')[0]) => {
+  const updateAdData = async (offerId: string, activeAds: number, date: string = new Date().toISOString().split('T')[0], observation: string = "") => {
     if (!user) return;
     
     try {
@@ -152,7 +168,11 @@ export const useOffers = () => {
         // Update existing record
         const { data, error } = await supabase
           .from("ad_data")
-          .update({ active_ads: activeAds, updated_at: new Date().toISOString() })
+          .update({ 
+            active_ads: activeAds, 
+            observation,
+            updated_at: new Date().toISOString() 
+          })
           .eq("id", existingData.id)
           .select()
           .single();
@@ -164,7 +184,12 @@ export const useOffers = () => {
         const { data, error } = await supabase
           .from("ad_data")
           .insert([
-            { offer_id: offerId, date, active_ads: activeAds }
+            { 
+              offer_id: offerId, 
+              date, 
+              active_ads: activeAds,
+              observation
+            }
           ])
           .select()
           .single();
@@ -187,11 +212,12 @@ export const useOffers = () => {
             updatedAdData[dateIndex] = { 
               ...updatedAdData[dateIndex], 
               activeAds, 
-              date 
+              date,
+              observation
             };
           } else {
             // Add new entry and sort by date
-            updatedAdData = [...updatedAdData, { date, activeAds }]
+            updatedAdData = [...updatedAdData, { date, activeAds, observation }]
               .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
           }
           
@@ -218,6 +244,76 @@ export const useOffers = () => {
     } catch (error: any) {
       console.error("Error updating ad data:", error);
       toast.error("Erro ao atualizar dados");
+    }
+  };
+  
+  // Update total page ads count
+  const updateTotalPageAds = async (offerId: string, totalPageAds: number) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from("offers")
+        .update({ 
+          total_page_ads: totalPageAds,
+          updated_at: new Date().toISOString() 
+        })
+        .eq("id", offerId);
+        
+      if (error) throw error;
+      
+      // Update offers state
+      setOffers(prevOffers => {
+        return prevOffers.map(offer => {
+          if (offer.id !== offerId) return offer;
+          
+          return {
+            ...offer,
+            totalPageAds,
+            updatedAt: new Date().toISOString()
+          };
+        });
+      });
+      
+      toast.success("Total de anúncios da página atualizado!");
+    } catch (error: any) {
+      console.error("Error updating total page ads:", error);
+      toast.error("Erro ao atualizar total de anúncios");
+    }
+  };
+  
+  // Update keywords
+  const updateKeywords = async (offerId: string, keywords: string[]) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from("offers")
+        .update({ 
+          keywords,
+          updated_at: new Date().toISOString() 
+        })
+        .eq("id", offerId);
+        
+      if (error) throw error;
+      
+      // Update offers state
+      setOffers(prevOffers => {
+        return prevOffers.map(offer => {
+          if (offer.id !== offerId) return offer;
+          
+          return {
+            ...offer,
+            keywords,
+            updatedAt: new Date().toISOString()
+          };
+        });
+      });
+      
+      toast.success("Palavras-chave atualizadas!");
+    } catch (error: any) {
+      console.error("Error updating keywords:", error);
+      toast.error("Erro ao atualizar palavras-chave");
     }
   };
   
@@ -250,7 +346,7 @@ export const useOffers = () => {
         if (error) throw error;
       } else {
         // Create new preference
-        const newPref: Record<string, any> = { 
+        const newPref = { 
           user_id: user.id, 
           offer_id: offerId,
           is_pinned: false,
@@ -264,7 +360,7 @@ export const useOffers = () => {
         
         const { error } = await supabase
           .from("user_preferences")
-          .insert([newPref]);
+          .insert(newPref);
           
         if (error) throw error;
       }
@@ -351,6 +447,58 @@ export const useOffers = () => {
       toast.error("Erro ao excluir oferta");
     }
   };
+
+  // Set up realtime subscriptions
+  useEffect(() => {
+    if (!user) return;
+    
+    // Subscribe to changes in the ad_data table
+    const adDataChannel = supabase
+      .channel('ad-data-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'ad_data'
+      }, async (payload) => {
+        // Refresh offers data when ad_data changes
+        await fetchOffers();
+      })
+      .subscribe();
+      
+    // Subscribe to changes in the offers table
+    const offersChannel = supabase
+      .channel('offers-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'offers'
+      }, async (payload) => {
+        // Refresh offers data when offers changes
+        await fetchOffers();
+      })
+      .subscribe();
+      
+    // Subscribe to changes in the user_preferences table
+    const preferencesChannel = supabase
+      .channel('preferences-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'user_preferences',
+        filter: `user_id=eq.${user.id}`
+      }, async (payload) => {
+        // Refresh offers data when preferences change
+        await fetchOffers();
+      })
+      .subscribe();
+    
+    return () => {
+      // Clean up subscriptions
+      supabase.removeChannel(adDataChannel);
+      supabase.removeChannel(offersChannel);
+      supabase.removeChannel(preferencesChannel);
+    };
+  }, [user]);
   
   // Initialize data loading when user changes
   useEffect(() => {
@@ -372,6 +520,8 @@ export const useOffers = () => {
     archivedOffers,
     addOffer,
     updateAdData,
+    updateTotalPageAds,
+    updateKeywords,
     pinOffer: (offer: Offer) => updatePreference(offer.id, 'pin', !pinnedOffers.has(offer.id)),
     favoriteOffer: (offer: Offer) => updatePreference(offer.id, 'favorite', !favoriteOffers.has(offer.id)),
     archiveOffer: (offer: Offer) => updatePreference(offer.id, 'archive', !archivedOffers.has(offer.id)),

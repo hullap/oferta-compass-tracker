@@ -12,7 +12,9 @@ import {
   Pin,
   Archive,
   Trash2,
-  MoreVertical
+  MoreVertical,
+  Tag,
+  MessageSquare
 } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "./ui/button";
@@ -23,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { Badge } from "./ui/badge";
 
 interface OfferCardProps {
   offer: Offer;
@@ -60,6 +63,11 @@ const OfferCard = ({
     : trend.direction === 'down' 
       ? 'text-score-low' 
       : 'text-muted-foreground';
+
+  // Check if there are any observations
+  const hasObservations = useMemo(() => {
+    return offer.adData.some(data => data.observation && data.observation.trim() !== "");
+  }, [offer.adData]);
   
   return (
     <Card 
@@ -145,10 +153,41 @@ const OfferCard = ({
           </div>
         </div>
         
+        {offer.totalPageAds !== undefined && offer.totalPageAds > 0 && (
+          <div className="flex justify-between items-center text-xs mb-3 bg-glass rounded-lg p-2.5">
+            <div className="font-medium">Total anúncios da página</div>
+            <div className="font-bold">{offer.totalPageAds}</div>
+          </div>
+        )}
+        
+        <div className="flex flex-wrap gap-1 my-3">
+          {(offer.keywords || []).slice(0, 3).map((keyword, index) => (
+            <Badge 
+              key={index}
+              variant="outline" 
+              className="text-xs py-0"
+            >
+              {keyword}
+            </Badge>
+          ))}
+          {(offer.keywords || []).length > 3 && (
+            <Badge variant="outline" className="text-xs py-0">
+              +{(offer.keywords || []).length - 3}
+            </Badge>
+          )}
+        </div>
+        
         <div className="flex justify-between items-center text-xs text-muted-foreground mt-3">
-          <div className="flex items-center gap-1">
-            <ChartLine size={14} className="opacity-70" />
-            <span>{dayCount} dias de dados</span>
+          <div className="flex gap-2">
+            <div className="flex items-center gap-1">
+              <ChartLine size={14} className="opacity-70" />
+              <span>{dayCount} dias</span>
+            </div>
+            {hasObservations && (
+              <div className="flex items-center gap-1">
+                <MessageSquare size={14} className="opacity-70" />
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-1">
             <Calendar size={14} className="opacity-70" />

@@ -3,6 +3,7 @@ export interface AdData {
   date: string;
   activeAds: number;
   trend?: number; // Percentage change from previous day
+  observation?: string; // Daily observations/notes
 }
 
 export interface Offer {
@@ -10,6 +11,10 @@ export interface Offer {
   name: string;
   description: string;
   adData: AdData[];
+  pageId?: string; // ID of the Facebook page
+  pageName?: string; // Name of the Facebook page
+  totalPageAds?: number; // Total ads count for the page (regardless of offer)
+  keywords?: string[]; // Keywords used to find the offer
   createdAt: string;
   updatedAt: string;
 }
@@ -32,6 +37,10 @@ export interface DatabaseOffer {
   user_id: string;
   name: string;
   description: string | null;
+  page_id?: string;
+  page_name?: string;
+  total_page_ads?: number;
+  keywords?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -41,6 +50,7 @@ export interface DatabaseAdData {
   offer_id: string;
   date: string;
   active_ads: number;
+  observation?: string;
   created_at: string;
   updated_at: string;
 }

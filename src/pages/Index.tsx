@@ -38,6 +38,8 @@ const Index = () => {
     archivedOffers,
     addOffer,
     updateAdData,
+    updateTotalPageAds,
+    updateKeywords,
     pinOffer,
     favoriteOffer,
     archiveOffer,
@@ -49,8 +51,13 @@ const Index = () => {
     // Filtro inicial pelo termo de busca
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase().trim();
+      const keywordsMatch = offer.keywords?.some(keyword => 
+        keyword.toLowerCase().includes(term)
+      );
+      
       if (!(offer.name.toLowerCase().includes(term) || 
-            offer.description.toLowerCase().includes(term))) {
+            offer.description.toLowerCase().includes(term) ||
+            keywordsMatch)) {
         return false;
       }
     }
@@ -104,6 +111,8 @@ const Index = () => {
             offer={selectedOffer}
             onBack={() => setSelectedOffer(null)}
             onUpdateAdData={updateAdData}
+            onUpdateTotalPageAds={updateTotalPageAds}
+            onUpdateKeywords={updateKeywords}
           />
         ) : (
           <div className="space-y-6">
@@ -160,7 +169,7 @@ const Index = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Buscar ofertas..."
+                placeholder="Buscar ofertas ou palavras-chave..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 border-gray-700 bg-transparent"

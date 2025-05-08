@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -15,12 +16,15 @@ import { cn } from "@/lib/utils";
 interface AdDataFormProps {
   offerId: string;
   offerName: string;
-  onSave: (offerId: string, activeAds: number, date: string) => void;
+  onSave: (offerId: string, activeAds: number, date: string, observation: string) => void;
+  initialObservation?: string;
+  initialActiveAds?: number;
 }
 
-const AdDataForm = ({ offerId, offerName, onSave }: AdDataFormProps) => {
-  const [activeAds, setActiveAds] = useState("");
+const AdDataForm = ({ offerId, offerName, onSave, initialObservation = "", initialActiveAds = 0 }: AdDataFormProps) => {
+  const [activeAds, setActiveAds] = useState(initialActiveAds ? initialActiveAds.toString() : "");
   const [date, setDate] = useState<Date>(new Date());
+  const [observation, setObservation] = useState(initialObservation);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +38,9 @@ const AdDataForm = ({ offerId, offerName, onSave }: AdDataFormProps) => {
 
     const formattedDate = format(date, "yyyy-MM-dd");
     
-    onSave(offerId, adsCount, formattedDate);
+    onSave(offerId, adsCount, formattedDate, observation);
     setActiveAds("");
+    setObservation("");
     toast.success("Dados registrados com sucesso!");
   };
   
@@ -57,6 +62,17 @@ const AdDataForm = ({ offerId, offerName, onSave }: AdDataFormProps) => {
               onChange={(e) => setActiveAds(e.target.value)}
               className="border-gray-700"
               required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="observation">Observações do dia</Label>
+            <Textarea
+              id="observation"
+              placeholder="Observações sobre os anúncios deste dia"
+              value={observation}
+              onChange={(e) => setObservation(e.target.value)}
+              className="border-gray-700 min-h-[80px]"
             />
           </div>
           

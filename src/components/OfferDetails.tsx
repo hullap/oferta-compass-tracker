@@ -1,22 +1,41 @@
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { calculateScore } from "@/services/scoreService";
-import { Offer } from "@/types/offer";
+import { Offer, AdData } from "@/types/offer";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import AdDataForm from "./AdDataForm";
 import AdTrendChart from "./AdTrendChart";
 import ScoreBadge from "./ScoreBadge";
-import { ChartBar, Calendar, ArrowUp, ArrowDown } from "lucide-react";
+import { ChartBar, Calendar, ArrowUp, ArrowDown, Edit2, MessageSquare, Tag } from "lucide-react";
 import AdDataCalendar from "./AdDataCalendar";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import { Badge } from "./ui/badge";
 
 interface OfferDetailsProps {
   offer: Offer;
   onBack: () => void;
-  onUpdateAdData: (offerId: string, activeAds: number, date: string) => void;
+  onUpdateAdData: (offerId: string, activeAds: number, date: string, observation: string) => void;
+  onUpdateTotalPageAds?: (offerId: string, totalPageAds: number) => void;
+  onUpdateKeywords?: (offerId: string, keywords: string[]) => void;
 }
 
-const OfferDetails = ({ offer, onBack, onUpdateAdData }: OfferDetailsProps) => {
+const OfferDetails = ({ 
+  offer, 
+  onBack, 
+  onUpdateAdData,
+  onUpdateTotalPageAds,
+  onUpdateKeywords
+}: OfferDetailsProps) => {
+  const [editingObservation, setEditingObservation] = useState<{index: number, value: string} | null>(null);
+  const [totalPageAds, setTotalPageAds] = useState(offer.totalPageAds?.toString() || "");
+  const [newKeyword, setNewKeyword] = useState("");
+  const [keywords, setKeywords] = useState<string[]>(offer.keywords || []);
+  
   const score = useMemo(() => calculateScore(offer), [offer]);
   
   const latestAds = offer.adData[offer.adData.length - 1]?.activeAds || 0;
@@ -24,7 +43,7 @@ const OfferDetails = ({ offer, onBack, onUpdateAdData }: OfferDetailsProps) => {
   const adsDifference = latestAds - previousAds;
   const adsTrend = adsDifference !== 0 ? (adsDifference > 0 ? 'up' : 'down') : 'stable';
   
-  // Cálculo de estatísticas
+  // Calculate statistics
   const stats = useMemo(() => {
     if (!offer.adData.length) return { avg: 0, max: 0, min: 0 };
     
@@ -35,6 +54,54 @@ const OfferDetails = ({ offer, onBack, onUpdateAdData }: OfferDetailsProps) => {
     
     return { avg, max, min };
   }, [offer.adData]);
+  
+  // Save observation edit
+  const saveObservationEdit = (index: number) => {
+    if (editingObservation === null) return;
+    
+    const adData = offer.adData[index];
+    if (!adData) return;
+    
+    onUpdateAdData(offer.id, adData.activeAds, adData.date, editingObservation.value);
+    setEditingObservation(null);
+  };
+  
+  // Save total page ads
+  const handleSaveTotalPageAds = () => {
+    if (!onUpdateTotalPageAds) return;
+    
+    const count = parseInt(totalPageAds);
+    if (isNaN(count) || count < 0) {
+      toast.error("Digite um número válido de anúncios");
+      return;
+    }
+    
+    onUpdateTotalPageAds(offer.id, count);
+  };
+  
+  // Add keyword
+  const addKeyword = () => {
+    if (!newKeyword.trim() || !onUpdateKeywords) return;
+    
+    if (keywords.includes(newKeyword.trim())) {
+      toast.error("Esta palavra-chave já existe");
+      return;
+    }
+    
+    const updatedKeywords = [...keywords, newKeyword.trim()];
+    setKeywords(updatedKeywords);
+    onUpdateKeywords(offer.id, updatedKeywords);
+    setNewKeyword("");
+  };
+  
+  // Remove keyword
+  const removeKeyword = (keyword: string) => {
+    if (!onUpdateKeywords) return;
+    
+    const updatedKeywords = keywords.filter(k => k !== keyword);
+    setKeywords(updatedKeywords);
+    onUpdateKeywords(offer.id, updatedKeywords);
+  };
   
   return (
     <div className="space-y-6">
@@ -76,6 +143,80 @@ const OfferDetails = ({ offer, onBack, onUpdateAdData }: OfferDetailsProps) => {
                 <div className="font-bold">{stats.min}</div>
               </div>
             </div>
+            
+            {/* Daily Observations List */}
+            <div className="mt-6">
+              <h3 className="text-base font-medium mb-3 flex items-center gap-2">
+                <MessageSquare size={16} />
+                Observações Diárias
+              </h3>
+              
+              {offer.adData.length > 0 ? (
+                <div className="space-y-3">
+                  {offer.adData.map((data, index) => (
+                    <div key={data.date} className="bg-glass rounded-lg p-3">
+                      <div className="flex justify-between items-center mb-1">
+                        <div className="flex items-center gap-2">
+                          <Calendar size={14} className="text-muted-foreground" />
+                          <span className="text-sm">{new Date(data.date).toLocaleDateString('pt-BR')}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm">{data.activeAds} anúncios</span>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-6 w-6"
+                            onClick={() => setEditingObservation({
+                              index,
+                              value: data.observation || ""
+                            })}
+                          >
+                            <Edit2 size={14} />
+                          </Button>
+                        </div>
+                      </div>
+                      
+                      {editingObservation !== null && editingObservation.index === index ? (
+                        <div className="space-y-2">
+                          <Textarea
+                            value={editingObservation.value}
+                            onChange={(e) => setEditingObservation({
+                              ...editingObservation,
+                              value: e.target.value
+                            })}
+                            className="border-gray-700 text-sm min-h-[60px]"
+                            placeholder="Adicionar observação..."
+                          />
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setEditingObservation(null)}
+                            >
+                              Cancelar
+                            </Button>
+                            <Button 
+                              size="sm"
+                              onClick={() => saveObservationEdit(index)}
+                            >
+                              Salvar
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          {data.observation ? data.observation : "Sem observações para este dia"}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Nenhuma observação disponível. Adicione dados de anúncios para começar a registrar observações.
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
         
@@ -104,7 +245,94 @@ const OfferDetails = ({ offer, onBack, onUpdateAdData }: OfferDetailsProps) => {
             </CardContent>
           </Card>
           
-          {/* Add the calendar view */}
+          {/* Total Page Ads Card */}
+          <Card className="border border-gray-800 card-gradient">
+            <CardHeader>
+              <CardTitle className="text-base">Anúncios da Página</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-4">
+                {offer.pageName && (
+                  <div className="text-sm text-muted-foreground">
+                    Página: {offer.pageName}
+                  </div>
+                )}
+                
+                <div className="space-y-2">
+                  <Label htmlFor="totalPageAds">Total de anúncios ativos da página</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="totalPageAds"
+                      type="number"
+                      min="0"
+                      placeholder="Total de anúncios da página"
+                      value={totalPageAds}
+                      onChange={(e) => setTotalPageAds(e.target.value)}
+                      className="border-gray-700"
+                    />
+                    <Button onClick={handleSaveTotalPageAds}>Salvar</Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Registre aqui o número total de anúncios ativos da página, independente da oferta específica.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Keywords Card */}
+          <Card className="border border-gray-800 card-gradient">
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Tag size={16} />
+                Palavras-chave
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newKeyword">Adicionar palavra-chave</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="newKeyword"
+                      placeholder="Nova palavra-chave"
+                      value={newKeyword}
+                      onChange={(e) => setNewKeyword(e.target.value)}
+                      className="border-gray-700"
+                    />
+                    <Button onClick={addKeyword}>Adicionar</Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Registre as palavras-chave que você usou para encontrar esta oferta.
+                  </p>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  {keywords.length > 0 ? (
+                    keywords.map((keyword, index) => (
+                      <Badge 
+                        key={index}
+                        variant="outline" 
+                        className="px-3 py-1 hover:bg-background/40 transition-colors"
+                      >
+                        {keyword}
+                        <button 
+                          className="ml-2 text-xs opacity-70 hover:opacity-100"
+                          onClick={() => removeKeyword(keyword)}
+                        >
+                          ✕
+                        </button>
+                      </Badge>
+                    ))
+                  ) : (
+                    <p className="text-sm text-muted-foreground">Nenhuma palavra-chave registrada.</p>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Calendar view */}
           <Card className="border border-gray-800 card-gradient">
             <CardHeader>
               <CardTitle className="text-base">Histórico por Data</CardTitle>
@@ -114,6 +342,7 @@ const OfferDetails = ({ offer, onBack, onUpdateAdData }: OfferDetailsProps) => {
             </CardContent>
           </Card>
           
+          {/* Ad Data Form */}
           <AdDataForm 
             offerId={offer.id} 
             offerName={offer.name}
