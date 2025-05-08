@@ -9,7 +9,133 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      ad_data: {
+        Row: {
+          active_ads: number
+          created_at: string
+          date: string
+          id: string
+          offer_id: string
+          updated_at: string
+        }
+        Insert: {
+          active_ads: number
+          created_at?: string
+          date: string
+          id?: string
+          offer_id: string
+          updated_at?: string
+        }
+        Update: {
+          active_ads?: number
+          created_at?: string
+          date?: string
+          id?: string
+          offer_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ad_data_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      offers: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id: string
+          updated_at?: string
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          is_archived: boolean
+          is_favorite: boolean
+          is_pinned: boolean
+          offer_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          is_favorite?: boolean
+          is_pinned?: boolean
+          offer_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          is_favorite?: boolean
+          is_pinned?: boolean
+          offer_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_preferences_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "offers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
