@@ -7,31 +7,36 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import AdDataForm from "./AdDataForm";
 import AdTrendChart from "./AdTrendChart";
 import ScoreBadge from "./ScoreBadge";
-import { ChartBar, Calendar, ArrowUp, ArrowDown, Edit2, MessageSquare, Tag, Link } from "lucide-react";
+import { ChartBar, Calendar, ArrowUp, ArrowDown, MessageSquare, Tag, Link, ExternalLink, Edit2 } from "lucide-react";
 import AdDataCalendar from "./AdDataCalendar";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Badge } from "./ui/badge";
+import EditOfferForm from "./EditOfferForm";
+import AdDataEntryActions from "./AdDataEntryActions";
 
 interface OfferDetailsProps {
   offer: Offer;
   onBack: () => void;
-  onUpdateAdData: (offerId: string, activeAds: number, date: string, observation: string) => void;
+  onUpdateOfferDetails?: (offerId: string, name: string, description: string) => Promise<void>;
+  onUpdateAdData: (offerId: string, activeAds: number, date: string, observation: string, time?: string) => void;
   onUpdateTotalPageAds?: (offerId: string, totalPageAds: number) => void;
   onUpdateKeywords?: (offerId: string, keywords: string[]) => void;
   onUpdateFacebookAdLibraryUrl?: (offerId: string, url: string) => void;
+  onDeleteAdData?: (offerId: string, date: string) => void;
 }
 
 const OfferDetails = ({ 
   offer, 
-  onBack, 
+  onBack,
+  onUpdateOfferDetails,
   onUpdateAdData,
   onUpdateTotalPageAds,
   onUpdateKeywords,
-  onUpdateFacebookAdLibraryUrl
+  onUpdateFacebookAdLibraryUrl,
+  onDeleteAdData
 }: OfferDetailsProps) => {
   const [editingObservation, setEditingObservation] = useState<{index: number, value: string} | null>(null);
   const [totalPageAds, setTotalPageAds] = useState(offer.totalPageAds?.toString() || "");
@@ -65,7 +70,7 @@ const OfferDetails = ({
     const adData = offer.adData[index];
     if (!adData) return;
     
-    onUpdateAdData(offer.id, adData.activeAds, adData.date, editingObservation.value);
+    onUpdateAdData(offer.id, adData.activeAds, adData.date, editingObservation.value, adData.time);
     setEditingObservation(null);
   };
   
@@ -82,6 +87,18 @@ const OfferDetails = ({
     onUpdateTotalPageAds(offer.id, count);
   };
   
+  // Handle update for ad data
+  const handleUpdateAdData = (date: string, activeAds: number, observation: string, time?: string) => {
+    onUpdateAdData(offer.id, activeAds, date, observation, time);
+  };
+  
+  // Handle delete for ad data
+  const handleDeleteAdData = (date: string) => {
+    if (onDeleteAdData) {
+      onDeleteAdData(offer.id, date);
+    }
+  };
+  
   // Save Facebook Ad Library URL
   const handleSaveFacebookAdLibraryUrl = () => {
     if (!onUpdateFacebookAdLibraryUrl) return;
@@ -94,7 +111,7 @@ const OfferDetails = ({
     if (!newKeyword.trim() || !onUpdateKeywords) return;
     
     if (keywords.includes(newKeyword.trim())) {
-      toast.error("Esta palavra-chave já existe");
+      toast.error("Esta tag já existe");
       return;
     }
     
@@ -126,8 +143,16 @@ const OfferDetails = ({
         <Button variant="outline" onClick={onBack} className="border-gray-700">
           Voltar
         </Button>
-        <h2 className="text-xl font-bold">{offer.name}</h2>
-        <div className="w-[70px]" /> {/* Espaçador para centralizar o título */}
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl font-bold">{offer.name}</h2>
+          {onUpdateOfferDetails && (
+            <EditOfferForm 
+              offer={offer} 
+              onSave={onUpdateOfferDetails}
+            />
+          )}
+        </div>
+        <div className="w-[70px]" />
       </div>
       
       <p className="text-muted-foreground">{offer.description}</p>
@@ -154,7 +179,7 @@ const OfferDetails = ({
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0">
-            <AdTrendChart data={offer.adData} />
+            <AdTrendChart data={offer.adData} totalPageAds={offer.totalPageAds} />
             
             <div className="grid grid-cols-3 gap-4 mt-6">
               <div className="bg-glass rounded-lg p-3">
@@ -186,20 +211,29 @@ const OfferDetails = ({
                         <div className="flex items-center gap-2">
                           <Calendar size={14} className="text-muted-foreground" />
                           <span className="text-sm">{new Date(data.date).toLocaleDateString('pt-BR')}</span>
+                          <span className="text-xs text-muted-foreground">{data.time || ""}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="text-sm">{data.activeAds} anúncios</span>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-6 w-6"
-                            onClick={() => setEditingObservation({
-                              index,
-                              value: data.observation || ""
-                            })}
-                          >
-                            <Edit2 size={14} />
-                          </Button>
+                          {onDeleteAdData ? (
+                            <AdDataEntryActions 
+                              adData={data}
+                              onUpdate={handleUpdateAdData}
+                              onDelete={handleDeleteAdData}
+                            />
+                          ) : (
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6"
+                              onClick={() => setEditingObservation({
+                                index,
+                                value: data.observation || ""
+                              })}
+                            >
+                              <Edit2 size={14} />
+                            </Button>
+                          )}
                         </div>
                       </div>
                       
@@ -305,7 +339,10 @@ const OfferDetails = ({
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="facebookAdLibraryUrl">Link da biblioteca de anúncios</Label>
+                  <Label htmlFor="facebookAdLibraryUrl" className="flex items-center gap-2">
+                    <ExternalLink size={14} className="mr-1" />
+                    Link da biblioteca de anúncios
+                  </Label>
                   <div className="flex gap-2">
                     <Input
                       id="facebookAdLibraryUrl"
@@ -330,17 +367,17 @@ const OfferDetails = ({
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Tag size={16} />
-                Palavras-chave
+                Tags
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="newKeyword">Adicionar palavra-chave</Label>
+                  <Label htmlFor="newKeyword">Adicionar tag</Label>
                   <div className="flex gap-2">
                     <Input
                       id="newKeyword"
-                      placeholder="Nova palavra-chave"
+                      placeholder="Nova tag"
                       value={newKeyword}
                       onChange={(e) => setNewKeyword(e.target.value)}
                       className="border-gray-700"
@@ -348,7 +385,7 @@ const OfferDetails = ({
                     <Button onClick={addKeyword}>Adicionar</Button>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Registre as palavras-chave que você usou para encontrar esta oferta.
+                    Registre as tags para categorizar e encontrar esta oferta facilmente.
                   </p>
                 </div>
                 
@@ -370,7 +407,7 @@ const OfferDetails = ({
                       </Badge>
                     ))
                   ) : (
-                    <p className="text-sm text-muted-foreground">Nenhuma palavra-chave registrada.</p>
+                    <p className="text-sm text-muted-foreground">Nenhuma tag registrada.</p>
                   )}
                 </div>
               </div>

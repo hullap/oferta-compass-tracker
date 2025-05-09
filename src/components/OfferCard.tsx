@@ -14,8 +14,8 @@ import {
   Trash2,
   MoreVertical,
   MessageSquare,
-  Link,
-  ExternalLink
+  ExternalLink,
+  Clock
 } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "./ui/button";
@@ -54,7 +54,7 @@ const OfferCard = ({
   const score = useMemo(() => calculateScore(offer), [offer]);
   const trend = useMemo(() => calculateTrend(offer), [offer]);
   
-  const lastUpdate = new Date(offer.updatedAt).toLocaleDateString('pt-BR');
+  const lastUpdate = new Date(offer.updatedAt).toLocaleString('pt-BR');
   const dayCount = offer.adData.length;
   const latestAds = offer.adData[offer.adData.length - 1]?.activeAds || 0;
   
@@ -88,12 +88,12 @@ const OfferCard = ({
       )}
       onClick={() => onClick(offer)}
     >
-      <CardHeader className="flex flex-row items-center justify-between p-4 pb-2 border-b border-slate-700/40">
-        <div className="flex-1 pr-2">
+      <CardHeader className="flex flex-row items-start justify-between p-4 pb-2 border-b border-slate-700/40">
+        <div className="flex-1 pr-6 max-w-[75%]">
           <h3 className="font-bold flex items-center gap-1.5 text-slate-100 group-hover:text-white truncate">
             {isPinned && <Pin size={14} className="text-blue-400 flex-shrink-0" />}
             {isFavorite && <Star size={14} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />}
-            {offer.name}
+            <span className="truncate">{offer.name}</span>
           </h3>
           <p className="text-xs text-slate-400 group-hover:text-slate-300 line-clamp-1 mt-0.5">{offer.description}</p>
           {offer.facebookAdLibraryUrl && (
@@ -106,8 +106,10 @@ const OfferCard = ({
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex-shrink-0">
           <ScoreBadge score={score} size="sm" />
+        </div>
+        <div className="absolute right-2 top-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-800 rounded-full">
@@ -157,34 +159,36 @@ const OfferCard = ({
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-3">
-        <div className="flex justify-between items-center text-xs mt-3 mb-3 bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
-          <div className="font-medium text-slate-300">Anúncios ativos</div>
-          <div className="flex items-center font-bold text-white">
-            {latestAds}
-            {trend.direction !== 'stable' && (
-              <span className={`ml-1.5 ${trendColor} flex items-center`}>
-                {trend.direction === 'up' ? (
-                  <>
-                    <ArrowUp size={14} />
-                    <span className="ml-0.5">{trend.percentage.toFixed(0)}%</span>
-                  </>
-                ) : (
-                  <>
-                    <ArrowDown size={14} />
-                    <span className="ml-0.5">{Math.abs(trend.percentage).toFixed(0)}%</span>
-                  </>
-                )}
-              </span>
-            )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 mb-3">
+          <div className="flex justify-between items-center text-xs bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
+            <div className="font-medium text-slate-300">Anúncios da oferta</div>
+            <div className="flex items-center font-bold text-white">
+              {latestAds}
+              {trend.direction !== 'stable' && (
+                <span className={`ml-1.5 ${trendColor} flex items-center`}>
+                  {trend.direction === 'up' ? (
+                    <>
+                      <ArrowUp size={14} />
+                      <span className="ml-0.5">{trend.percentage.toFixed(0)}%</span>
+                    </>
+                  ) : (
+                    <>
+                      <ArrowDown size={14} />
+                      <span className="ml-0.5">{Math.abs(trend.percentage).toFixed(0)}%</span>
+                    </>
+                  )}
+                </span>
+              )}
+            </div>
           </div>
+          
+          {offer.totalPageAds !== undefined && offer.totalPageAds > 0 && (
+            <div className="flex justify-between items-center text-xs bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
+              <div className="font-medium text-slate-300">Anúncios da página</div>
+              <div className="font-bold text-emerald-400">{offer.totalPageAds}</div>
+            </div>
+          )}
         </div>
-        
-        {offer.totalPageAds !== undefined && offer.totalPageAds > 0 && (
-          <div className="flex justify-between items-center text-xs mb-3 bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
-            <div className="font-medium text-slate-300">Total anúncios da página</div>
-            <div className="font-bold text-emerald-400">{offer.totalPageAds}</div>
-          </div>
-        )}
         
         <div className="flex flex-wrap gap-1.5 my-3 min-h-[26px]">
           {(offer.keywords || []).slice(0, 3).map((keyword, index) => (
@@ -219,8 +223,8 @@ const OfferCard = ({
             )}
           </div>
           <div className="flex items-center gap-1">
-            <Calendar size={14} className="opacity-70" />
-            <span>Atualizado: {lastUpdate}</span>
+            <Clock size={14} className="opacity-70" />
+            <span>{lastUpdate}</span>
           </div>
         </div>
         

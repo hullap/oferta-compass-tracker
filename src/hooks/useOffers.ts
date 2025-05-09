@@ -25,6 +25,7 @@ export const useOffers = () => {
       const { data: offersData, error: offersError } = await supabase
         .from("offers")
         .select("*")
+        .eq("user_id", user.id)
         .order("created_at", { ascending: false });
         
       if (offersError) throw offersError;
@@ -44,7 +45,8 @@ export const useOffers = () => {
           const transformedAdData: AdData[] = adData.map(item => ({
             date: item.date,
             activeAds: item.active_ads,
-            observation: item.observation || ""
+            observation: item.observation || "",
+            time: item.time || ""
           }));
           
           // Calculate trends for each day
@@ -102,6 +104,43 @@ export const useOffers = () => {
       toast.error("Erro ao buscar ofertas");
     } finally {
       setLoading(false);
+    }
+  };
+  
+  // Update offer details (name, description)
+  const updateOfferDetails = async (offerId: string, name: string, description: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from("offers")
+        .update({
+          name,
+          description,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", offerId);
+      
+      if (error) throw error;
+      
+      // Update offers state
+      setOffers(prev => prev.map(offer => {
+        if (offer.id === offerId) {
+          return {
+            ...offer,
+            name,
+            description,
+            updatedAt: new Date().toISOString()
+          };
+        }
+        return offer;
+      }));
+      
+      toast.success("Detalhes da oferta atualizados!");
+    } catch (error: any) {
+      console.error("Error updating offer details:", error);
+      toast.error("Erro ao atualizar detalhes da oferta");
+      throw error;
     }
   };
   
@@ -188,10 +227,13 @@ export const useOffers = () => {
   };
   
   // Update ad data for an offer
-  const updateAdData = async (offerId: string, activeAds: number, date: string = new Date().toISOString().split('T')[0], observation: string = "") => {
+  const updateAdData = async (offerId: string, activeAds: number, date: string = new Date().toISOString().split('T')[0], observation: string = "", time?: string) => {
     if (!user) return;
     
     try {
+      // Current time if not provided
+      const currentTime = time || new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      
       // Check if entry already exists
       const { data: existingData } = await supabase
         .from("ad_data")
@@ -209,6 +251,7 @@ export const useOffers = () => {
           .update({ 
             active_ads: activeAds, 
             observation,
+            time: currentTime,
             updated_at: new Date().toISOString() 
           })
           .eq("id", existingData.id)
@@ -226,7 +269,8 @@ export const useOffers = () => {
               offer_id: offerId, 
               date, 
               active_ads: activeAds,
-              observation
+              observation,
+              time: currentTime
             }
           ])
           .select()
@@ -251,11 +295,12 @@ export const useOffers = () => {
               ...updatedAdData[dateIndex], 
               activeAds, 
               date,
-              observation
+              observation,
+              time: currentTime
             };
           } else {
             // Add new entry and sort by date
-            updatedAdData = [...updatedAdData, { date, activeAds, observation }]
+            updatedAdData = [...updatedAdData, { date, activeAds, observation, time: currentTime }]
               .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
           }
           
@@ -282,6 +327,53 @@ export const useOffers = () => {
     } catch (error: any) {
       console.error("Error updating ad data:", error);
       toast.error("Erro ao atualizar dados");
+    }
+  };
+  
+  // Delete ad data entry
+  const deleteAdData = async (offerId: string, date: string) => {
+    if (!user) return;
+    
+    try {
+      const { error } = await supabase
+        .from("ad_data")
+        .delete()
+        .eq("offer_id", offerId)
+        .eq("date", date);
+        
+      if (error) throw error;
+      
+      // Update offers state
+      setOffers(prevOffers => {
+        return prevOffers.map(offer => {
+          if (offer.id !== offerId) return offer;
+          
+          // Remove the data entry
+          const updatedAdData = offer.adData.filter(ad => ad.date !== date);
+          
+          // Recalculate trends
+          updatedAdData.forEach((item, idx) => {
+            if (idx > 0) {
+              const prevAds = updatedAdData[idx - 1].activeAds;
+              if (prevAds > 0) {
+                const change = item.activeAds - prevAds;
+                item.trend = (change / prevAds) * 100;
+              }
+            }
+          });
+          
+          return {
+            ...offer,
+            adData: updatedAdData,
+            updatedAt: new Date().toISOString()
+          };
+        });
+      });
+      
+      toast.success("Registro excluído com sucesso!");
+    } catch (error: any) {
+      console.error("Error deleting ad data:", error);
+      toast.error("Erro ao excluir registro");
     }
   };
   
@@ -320,7 +412,7 @@ export const useOffers = () => {
     }
   };
   
-  // Update keywords
+  // Update keywords/tags
   const updateKeywords = async (offerId: string, keywords: string[]) => {
     if (!user) return;
     
@@ -348,10 +440,10 @@ export const useOffers = () => {
         });
       });
       
-      toast.success("Palavras-chave atualizadas!");
+      toast.success("Tags atualizadas!");
     } catch (error: any) {
       console.error("Error updating keywords:", error);
-      toast.error("Erro ao atualizar palavras-chave");
+      toast.error("Erro ao atualizar tags");
     }
   };
   
@@ -557,7 +649,9 @@ export const useOffers = () => {
     favoriteOffers,
     archivedOffers,
     addOffer,
+    updateOfferDetails,
     updateAdData,
+    deleteAdData,
     updateTotalPageAds,
     updateKeywords,
     updateFacebookAdLibraryUrl,

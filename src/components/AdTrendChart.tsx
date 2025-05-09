@@ -14,8 +14,10 @@ const AdTrendChart = ({ data, totalPageAds, title = "Tendência de Anúncios Ati
   const chartData = useMemo(() => {
     return data.map(item => ({
       date: new Date(item.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+      time: item.time || "00:00",
       ads: item.activeAds,
-      totalAds: totalPageAds || 0
+      totalAds: totalPageAds || 0,
+      fullDate: `${new Date(item.date).toLocaleDateString('pt-BR')}${item.time ? ' ' + item.time : ''}`
     }));
   }, [data, totalPageAds]);
   
@@ -25,25 +27,8 @@ const AdTrendChart = ({ data, totalPageAds, title = "Tendência de Anúncios Ati
     return Math.ceil(Math.max(maxAds, maxTotalAds) * 1.2); // 20% acima do valor máximo
   }, [data, totalPageAds]);
 
-  const chartConfig = {
-    offerAds: {
-      label: "Anúncios da Oferta",
-      theme: {
-        light: "#4F46E5",
-        dark: "#4F46E5"
-      }
-    },
-    totalAds: {
-      label: "Anúncios Totais da Página",
-      theme: {
-        light: "#10B981",
-        dark: "#10B981"
-      }
-    }
-  };
-
   return (
-    <Card className="border border-slate-700 bg-gradient-to-br from-slate-900 to-slate-800 shadow-lg h-full">
+    <Card className="border border-slate-700 bg-glass shadow-lg h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-base font-medium bg-gradient-to-r from-blue-400 to-purple-400 text-transparent bg-clip-text">{title}</CardTitle>
       </CardHeader>
@@ -72,7 +57,12 @@ const AdTrendChart = ({ data, totalPageAds, title = "Tendência de Anúncios Ati
                   padding: '8px',
                   boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
                 }} 
-                labelFormatter={(label) => `Data: ${label}`}
+                labelFormatter={(_, payload) => {
+                  if (payload && payload.length > 0) {
+                    return `Data: ${payload[0].payload.fullDate}`;
+                  }
+                  return "Data";
+                }}
               />
               <Legend 
                 verticalAlign="top" 

@@ -4,6 +4,7 @@ export interface AdData {
   activeAds: number;
   trend?: number; // Percentage change from previous day
   observation?: string; // Daily observations/notes
+  time?: string; // Time of the data collection in HH:MM format
 }
 
 export interface Offer {
@@ -14,7 +15,7 @@ export interface Offer {
   pageId?: string; // ID of the Facebook page
   pageName?: string; // Name of the Facebook page
   totalPageAds?: number; // Total ads count for the page (regardless of offer)
-  keywords?: string[]; // Keywords used to find the offer
+  keywords?: string[]; // Keywords/tags used to find the offer
   facebookAdLibraryUrl?: string; // URL to the Facebook Ad Library for this offer
   createdAt: string;
   updatedAt: string;
@@ -53,6 +54,7 @@ export interface DatabaseAdData {
   date: string;
   active_ads: number;
   observation?: string;
+  time?: string; // Time in HH:MM format
   created_at: string;
   updated_at: string;
 }

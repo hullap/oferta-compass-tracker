@@ -37,7 +37,9 @@ const Index = () => {
     favoriteOffers,
     archivedOffers,
     addOffer,
+    updateOfferDetails,
     updateAdData,
+    deleteAdData,
     updateTotalPageAds,
     updateKeywords,
     updateFacebookAdLibraryUrl,
@@ -111,10 +113,12 @@ const Index = () => {
           <OfferDetails 
             offer={selectedOffer}
             onBack={() => setSelectedOffer(null)}
+            onUpdateOfferDetails={updateOfferDetails}
             onUpdateAdData={updateAdData}
             onUpdateTotalPageAds={updateTotalPageAds}
             onUpdateKeywords={updateKeywords}
             onUpdateFacebookAdLibraryUrl={updateFacebookAdLibraryUrl}
+            onDeleteAdData={deleteAdData}
           />
         ) : (
           <div className="space-y-6">
@@ -171,7 +175,7 @@ const Index = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Buscar ofertas ou palavras-chave..."
+                placeholder="Buscar ofertas ou tags..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 border-gray-700 bg-transparent"
@@ -187,7 +191,7 @@ const Index = () => {
               </div>
             ) : (
               <div className={viewMode === "grid" 
-                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" 
+                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
                 : "flex flex-col gap-4"
               }>
                 {filteredOffers.length > 0 ? (

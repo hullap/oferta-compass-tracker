@@ -1,5 +1,5 @@
 
-import { ChartLine, Plus, LogOut, User } from "lucide-react";
+import { ChartLine, Plus, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback } from "./ui/avatar";
@@ -26,19 +26,19 @@ const Header = ({ onNewOfferClick }: HeaderProps) => {
   return (
     <header className="flex justify-between items-center py-4 px-4 md:px-6 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 sticky top-0 z-10 backdrop-blur-md bg-opacity-90">
       <Link to="/" className="flex items-center gap-3 transition-transform hover:scale-105">
-        <div className="bg-gradient-to-br from-blue-600 to-purple-600 p-2 rounded-lg shadow-lg">
-          <ChartLine className="h-6 w-6 text-white" />
+        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-2.5 rounded-xl shadow-lg">
+          <ChartLine className="h-5 w-5 text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 text-transparent bg-clip-text">Oferta Compass</h1>
-          <p className="text-xs text-slate-400">Rastreamento de anúncios</p>
+          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 text-transparent bg-clip-text">Ad Tracker Pro</h1>
+          <p className="text-xs text-slate-400">Monitoramento de anúncios</p>
         </div>
       </Link>
       
       <div className="flex items-center gap-3">
         <Button 
           onClick={onNewOfferClick} 
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all"
+          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all"
         >
           <Plus className="h-4 w-4" />
           <span className="hidden sm:inline">Nova Oferta</span>
@@ -48,7 +48,7 @@ const Header = ({ onNewOfferClick }: HeaderProps) => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full border border-slate-700 hover:bg-slate-800 transition-colors">
               <Avatar className="border-2 border-slate-600">
-                <AvatarFallback className="bg-gradient-to-br from-blue-600 to-purple-600 text-white">
+                <AvatarFallback className="bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
                   {userInitials}
                 </AvatarFallback>
               </Avatar>
