@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
@@ -15,7 +15,7 @@ export const useOffers = () => {
   const { user } = useAuth();
   
   // Fetch all offers for the current user
-  const fetchOffers = async () => {
+  const fetchOffers = useCallback(async () => {
     if (!user) return;
     
     try {
@@ -46,7 +46,7 @@ export const useOffers = () => {
             date: item.date,
             activeAds: item.active_ads,
             observation: item.observation || "",
-            time: item.time || "" // Add time property 
+            time: item.time || "" // Add time property
           }));
           
           // Calculate trends for each day
@@ -105,7 +105,7 @@ export const useOffers = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
   
   // Update offer details (name, description)
   const updateOfferDetails = async (offerId: string, name: string, description: string) => {
@@ -589,9 +589,9 @@ export const useOffers = () => {
         event: '*',
         schema: 'public',
         table: 'ad_data'
-      }, async (payload) => {
-        // Refresh offers data when ad_data changes
-        await fetchOffers();
+      }, (payload) => {
+        console.log('Ad data change detected:', payload);
+        fetchOffers();
       })
       .subscribe();
       
@@ -602,9 +602,9 @@ export const useOffers = () => {
         event: '*',
         schema: 'public',
         table: 'offers'
-      }, async (payload) => {
-        // Refresh offers data when offers changes
-        await fetchOffers();
+      }, (payload) => {
+        console.log('Offers change detected:', payload);
+        fetchOffers();
       })
       .subscribe();
       
@@ -616,19 +616,18 @@ export const useOffers = () => {
         schema: 'public',
         table: 'user_preferences',
         filter: `user_id=eq.${user.id}`
-      }, async (payload) => {
-        // Refresh offers data when preferences change
-        await fetchOffers();
+      }, (payload) => {
+        console.log('Preferences change detected:', payload);
+        fetchOffers();
       })
       .subscribe();
     
     return () => {
-      // Clean up subscriptions
       supabase.removeChannel(adDataChannel);
       supabase.removeChannel(offersChannel);
       supabase.removeChannel(preferencesChannel);
     };
-  }, [user]);
+  }, [user, fetchOffers]);
   
   // Initialize data loading when user changes
   useEffect(() => {
@@ -640,7 +639,7 @@ export const useOffers = () => {
       setFavoriteOffers(new Set());
       setArchivedOffers(new Set());
     }
-  }, [user]);
+  }, [user, fetchOffers]);
   
   return {
     offers,
