@@ -24,7 +24,7 @@ interface Task {
 interface TaskListProps {
   offerId: string;
   offerName: string;
-  onAddTask: (offerId: string, title: string, description?: string) => Promise<void>;
+  onAddTask: (offerId: string, title: string, description?: string) => Promise<any>; // Updated return type to be more flexible
   onUpdateTask: (taskId: string, updates: Partial<Task>) => Promise<void>;
   onDeleteTask: (taskId: string) => Promise<void>;
   onReorderTasks: (taskIds: string[]) => Promise<void>;
