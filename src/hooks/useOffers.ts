@@ -46,7 +46,7 @@ export const useOffers = () => {
             date: item.date,
             activeAds: item.active_ads,
             observation: item.observation || "",
-            time: item.time || ""
+            time: item.time || "" // Add time property 
           }));
           
           // Calculate trends for each day

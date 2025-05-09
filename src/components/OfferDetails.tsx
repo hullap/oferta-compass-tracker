@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "./ui/badge";
 import EditOfferForm from "./EditOfferForm";
 import AdDataEntryActions from "./AdDataEntryActions";
+import { Textarea } from "./ui/textarea";
 
 interface OfferDetailsProps {
   offer: Offer;
