@@ -11,10 +11,17 @@ interface ScoreBadgeProps {
 }
 
 const ScoreBadge = ({ score, size = 'md', showLabel = true, className }: ScoreBadgeProps) => {
+  // Mapeamento de cores moderno usando gradiente
   const scoreColorMap = {
-    high: "bg-score-high",
-    medium: "bg-score-medium",
-    low: "bg-score-low"
+    high: "from-emerald-500 to-emerald-700 border-emerald-400 text-emerald-100",
+    medium: "from-amber-500 to-amber-700 border-amber-400 text-amber-100",
+    low: "from-red-500 to-red-700 border-red-400 text-red-100"
+  };
+  
+  const scoreLabelColorMap = {
+    high: "text-emerald-400",
+    medium: "text-amber-400",
+    low: "text-red-400"
   };
   
   const sizeMap = {
@@ -26,9 +33,10 @@ const ScoreBadge = ({ score, size = 'md', showLabel = true, className }: ScoreBa
   return (
     <div className={cn("flex flex-col items-center", className)}>
       <div className={cn(
-        "rounded-full flex items-center justify-center font-semibold text-white",
-        sizeMap[size],
-        scoreColorMap[score.result]
+        "rounded-full flex items-center justify-center font-semibold shadow-lg border-2",
+        "bg-gradient-to-br transition-all duration-300",
+        `${sizeMap[size]}`,
+        `${scoreColorMap[score.result]}`
       )}>
         {formatScorePercent(score.value)}
       </div>
@@ -36,7 +44,7 @@ const ScoreBadge = ({ score, size = 'md', showLabel = true, className }: ScoreBa
         <span className={cn(
           "mt-2 font-medium",
           size === 'sm' ? "text-xs" : "text-sm",
-          `text-score-${score.result}`
+          scoreLabelColorMap[score.result]
         )}>
           {score.label}
         </span>

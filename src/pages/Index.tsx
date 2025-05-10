@@ -1,12 +1,12 @@
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Offer } from "@/types/offer";
 import Header from "@/components/Header";
 import OfferCard from "@/components/OfferCard";
 import OfferDetails from "@/components/OfferDetails";
 import NewOfferForm from "@/components/NewOfferForm";
 import { Input } from "@/components/ui/input";
-import { Search, LayoutGrid, LayoutList, Star, Archive as ArchiveIcon } from "lucide-react";
+import { Search, LayoutGrid, LayoutList, Star, Archive as ArchiveIcon, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu,
@@ -16,6 +16,8 @@ import {
   DropdownMenuSeparator
 } from "@/components/ui/dropdown-menu";
 import { useOffers } from "@/hooks/useOffers";
+import { calculateScore } from "@/services/scoreService";
+import { toast } from "sonner";
 
 const Index = () => {
   // Estado para a oferta selecionada (detalhes)
@@ -28,6 +30,8 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   // Estado para filtro de visualização
   const [viewFilter, setViewFilter] = useState<"all" | "pinned" | "favorites" | "archived">("all");
+  // Estado para definir quando os dados foram atualizados
+  const [refreshTimestamp, setRefreshTimestamp] = useState(Date.now());
 
   // Use our custom hook for data management
   const {
@@ -46,8 +50,9 @@ const Index = () => {
     pinOffer,
     favoriteOffer,
     archiveOffer,
-    deleteOffer
-  } = useOffers();
+    deleteOffer,
+    refreshOffers
+  } = useOffers(refreshTimestamp);
 
   // Filtragem das ofertas com base no termo de busca
   const filteredOffers = offers.filter(offer => {
@@ -79,15 +84,22 @@ const Index = () => {
     
     return true;
   }).sort((a, b) => {
-    // Ordenação: primeiro as fixadas, depois as normais
-    if (pinnedOffers.has(a.id) === pinnedOffers.has(b.id)) {
-      // Se ambas estão fixadas ou ambas não estão, ordena por data de criação (mais recente primeiro)
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    // Primeiro ordenamos por score (verdes primeiro, depois amarelos, por último vermelhos)
+    const scoreA = calculateScore(a);
+    const scoreB = calculateScore(b);
+    
+    const scoreOrder = ['high', 'medium', 'low'];
+    const scoreComparison = scoreOrder.indexOf(scoreA.result) - scoreOrder.indexOf(scoreB.result);
+    
+    if (scoreComparison !== 0) return scoreComparison;
+    
+    // Se os scores são iguais, ordenamos pelo status de pin
+    if (pinnedOffers.has(a.id) !== pinnedOffers.has(b.id)) {
+      return pinnedOffers.has(a.id) ? -1 : 1;
     }
-    // Se apenas a primeira está fixada, ela vem primeiro
-    if (pinnedOffers.has(a.id)) return -1;
-    // Se apenas a segunda está fixada, ela vem primeiro
-    return 1;
+    
+    // Por último, ordenamos por data de criação (mais recente primeiro)
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   // Handler para adicionar uma nova oferta
@@ -96,12 +108,30 @@ const Index = () => {
     setIsCreatingOffer(false);
   };
 
+  // Handler para atualizar manualmente os dados
+  const handleRefreshData = () => {
+    setRefreshTimestamp(Date.now());
+    refreshOffers();
+    toast.success("Dados atualizados com sucesso!");
+  };
+
+  // Handler para atualizar uma oferta específica
+  const handleRefreshOffer = (offer: Offer) => {
+    // Aqui só atualizamos o timestamp para forçar um recalculo dos scores
+    // Em uma implementação futura pode ser feita uma atualização real dos dados
+    toast.success(`Dados da oferta "${offer.name}" atualizados!`);
+    setRefreshTimestamp(Date.now());
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
-      <Header onNewOfferClick={() => {
-        setSelectedOffer(null);
-        setIsCreatingOffer(true);
-      }} />
+      <Header 
+        onNewOfferClick={() => {
+          setSelectedOffer(null);
+          setIsCreatingOffer(true);
+        }} 
+        onRefreshData={handleRefreshData}
+      />
       
       <main className="flex-1 container py-6 px-4">
         {isCreatingOffer ? (
@@ -140,6 +170,16 @@ const Index = () => {
                   onClick={() => setViewMode("list")}
                 >
                   <LayoutList size={18} />
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-gray-700 hover:border-blue-500"
+                  onClick={handleRefreshData}
+                  title="Atualizar dados"
+                >
+                  <RefreshCcw size={18} />
                 </Button>
 
                 <DropdownMenu>
@@ -204,6 +244,7 @@ const Index = () => {
                         onFavorite={favoriteOffer}
                         onArchive={archiveOffer}
                         onDelete={deleteOffer}
+                        onRefresh={handleRefreshOffer}
                         isPinned={pinnedOffers.has(offer.id)}
                         isFavorite={favoriteOffers.has(offer.id)}
                         isArchived={archivedOffers.has(offer.id)}

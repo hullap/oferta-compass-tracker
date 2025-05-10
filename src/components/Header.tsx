@@ -1,5 +1,5 @@
 
-import { ChartLine, Plus, LogOut } from "lucide-react";
+import { ChartLine, Plus, LogOut, RefreshCcw } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback } from "./ui/avatar";
@@ -11,13 +11,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import DailyPerformance from "./DailyPerformance";
+import { useState } from "react";
 
 interface HeaderProps {
   onNewOfferClick: () => void;
+  onRefreshData?: () => void;
 }
 
-const Header = ({ onNewOfferClick }: HeaderProps) => {
+const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
   const { user, signOut } = useAuth();
+  const [showPerformance, setShowPerformance] = useState(false);
   
   const userInitials = user?.email 
     ? user.email.substring(0, 2).toUpperCase() 
@@ -35,7 +39,32 @@ const Header = ({ onNewOfferClick }: HeaderProps) => {
         </div>
       </Link>
       
+      <div className="fixed right-1/2 transform translate-x-1/2 z-20 top-16">
+        {showPerformance && <DailyPerformance />}
+      </div>
+      
       <div className="flex items-center gap-3">
+        {onRefreshData && (
+          <Button
+            onClick={onRefreshData}
+            size="icon"
+            variant="outline"
+            className="rounded-full border border-slate-700 hover:bg-slate-800 hover:border-blue-500"
+            title="Atualizar dados"
+          >
+            <RefreshCcw className="h-4 w-4" />
+          </Button>
+        )}
+        
+        <Button 
+          variant="outline" 
+          size="sm"
+          className={`border ${showPerformance ? 'border-blue-500 bg-blue-900/20' : 'border-slate-700'} hover:border-blue-500 hover:bg-slate-800`}
+          onClick={() => setShowPerformance(!showPerformance)}
+        >
+          Desempenho
+        </Button>
+        
         <Button 
           onClick={onNewOfferClick} 
           className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all"

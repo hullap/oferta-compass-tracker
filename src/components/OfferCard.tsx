@@ -15,7 +15,8 @@ import {
   MoreVertical,
   MessageSquare,
   ExternalLink,
-  Clock
+  Clock,
+  RefreshCcw
 } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "./ui/button";
@@ -35,6 +36,7 @@ interface OfferCardProps {
   onFavorite?: (offer: Offer) => void;
   onArchive?: (offer: Offer) => void;
   onDelete?: (offer: Offer) => void;
+  onRefresh?: (offer: Offer) => void;
   isPinned?: boolean;
   isFavorite?: boolean;
   isArchived?: boolean;
@@ -47,6 +49,7 @@ const OfferCard = ({
   onFavorite,
   onArchive,
   onDelete,
+  onRefresh,
   isPinned = false,
   isFavorite = false,
   isArchived = false
@@ -78,12 +81,25 @@ const OfferCard = ({
     }
   };
   
+  // Define a classe de borda baseada no score (para priorização visual)
+  const scoreBorderClass = score.result === 'high' 
+    ? 'border-emerald-500/50 shadow-emerald-900/20 shadow-md hover:border-emerald-400 hover:shadow-emerald-800/40' 
+    : score.result === 'low'
+    ? 'border-red-500/30 shadow-red-900/10'
+    : 'border-slate-700 hover:border-slate-600';
+  
+  const handleRefresh = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onRefresh && onRefresh(offer);
+  };
+  
   return (
     <Card 
       className={cn(
-        "overflow-hidden transition-all duration-300 hover:shadow-lg bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-700 group",
+        "overflow-hidden transition-all duration-300 hover:shadow-lg bg-gradient-to-br from-slate-900 to-slate-800 border group",
         isPinned && "border-blue-500 shadow-blue-900/20 shadow-md",
         isArchived && "opacity-60",
+        scoreBorderClass,
         "hover:transform hover:scale-[1.02] hover:shadow-xl"
       )}
       onClick={() => onClick(offer)}
@@ -106,10 +122,10 @@ const OfferCard = ({
             </div>
           )}
         </div>
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 absolute right-10 top-4">
           <ScoreBadge score={score} size="sm" />
         </div>
-        <div className="absolute right-2 top-2">
+        <div className="absolute right-2 top-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-800 rounded-full">
@@ -117,6 +133,15 @@ const OfferCard = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44 border-slate-700 bg-slate-900">
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                onRefresh && onRefresh(offer);
+              }}
+              className="hover:bg-slate-800 focus:bg-slate-800"
+              >
+                <RefreshCcw className="mr-2 h-4 w-4" />
+                Atualizar dados
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
                 onPin && onPin(offer);
@@ -158,7 +183,17 @@ const OfferCard = ({
           </DropdownMenu>
         </div>
       </CardHeader>
-      <CardContent className="p-4 pt-3">
+      <CardContent className="p-4 pt-3 relative">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-7 w-7 absolute top-3 right-3 bg-slate-800/70 hover:bg-slate-700 rounded-full z-10"
+          onClick={handleRefresh}
+          title="Atualizar dados"
+        >
+          <RefreshCcw size={14} />
+        </Button>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 mb-3">
           <div className="flex justify-between items-center text-xs bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
             <div className="font-medium text-slate-300">Anúncios da oferta</div>
