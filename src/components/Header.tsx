@@ -11,8 +11,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import DailyPerformance from "./DailyPerformance";
-import { useState } from "react";
 
 interface HeaderProps {
   onNewOfferClick: () => void;
@@ -21,7 +19,6 @@ interface HeaderProps {
 
 const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
   const { user, signOut } = useAuth();
-  const [showPerformance, setShowPerformance] = useState(false);
   
   const userInitials = user?.email 
     ? user.email.substring(0, 2).toUpperCase() 
@@ -39,10 +36,6 @@ const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
         </div>
       </Link>
       
-      <div className="fixed right-1/2 transform translate-x-1/2 z-20 top-16">
-        {showPerformance && <DailyPerformance />}
-      </div>
-      
       <div className="flex items-center gap-3">
         {onRefreshData && (
           <Button
@@ -55,15 +48,6 @@ const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
             <RefreshCcw className="h-4 w-4" />
           </Button>
         )}
-        
-        <Button 
-          variant="outline" 
-          size="sm"
-          className={`border ${showPerformance ? 'border-blue-500 bg-blue-900/20' : 'border-slate-700'} hover:border-blue-500 hover:bg-slate-800`}
-          onClick={() => setShowPerformance(!showPerformance)}
-        >
-          Desempenho
-        </Button>
         
         <Button 
           onClick={onNewOfferClick} 

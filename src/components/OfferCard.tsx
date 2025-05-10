@@ -36,7 +36,7 @@ interface OfferCardProps {
   onFavorite?: (offer: Offer) => void;
   onArchive?: (offer: Offer) => void;
   onDelete?: (offer: Offer) => void;
-  onRefresh?: (offer: Offer) => void;
+  onRefresh?: () => void;
   isPinned?: boolean;
   isFavorite?: boolean;
   isArchived?: boolean;
@@ -90,7 +90,7 @@ const OfferCard = ({
   
   const handleRefresh = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onRefresh && onRefresh(offer);
+    onRefresh && onRefresh();
   };
   
   return (
@@ -135,7 +135,7 @@ const OfferCard = ({
             <DropdownMenuContent align="end" className="w-44 border-slate-700 bg-slate-900">
               <DropdownMenuItem onClick={(e) => {
                 e.stopPropagation();
-                onRefresh && onRefresh(offer);
+                onRefresh && onRefresh();
               }}
               className="hover:bg-slate-800 focus:bg-slate-800"
               >

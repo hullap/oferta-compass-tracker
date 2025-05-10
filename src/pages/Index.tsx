@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import { Offer } from "@/types/offer";
 import Header from "@/components/Header";
@@ -87,10 +88,10 @@ const Index = () => {
     const scoreA = calculateScore(a);
     const scoreB = calculateScore(b);
     
-    const scoreOrder = ['high', 'medium', 'low'];
-    const scoreComparison = scoreOrder.indexOf(scoreA.result) - scoreOrder.indexOf(scoreB.result);
-    
-    if (scoreComparison !== 0) return scoreComparison;
+    // Ordenação por valor do score (percentual) - maior para o menor
+    if (scoreA.value !== scoreB.value) {
+      return scoreB.value - scoreA.value;
+    }
     
     // Se os scores são iguais, ordenamos pelo status de pin
     if (pinnedOffers.has(a.id) !== pinnedOffers.has(b.id)) {
