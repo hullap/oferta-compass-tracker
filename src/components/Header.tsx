@@ -30,7 +30,7 @@ const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
     : "U";
     
   return (
-    <header className="flex justify-between items-center py-4 px-4 md:px-6 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 sticky top-0 z-10 backdrop-blur-md bg-opacity-90">
+    <header className="flex justify-between items-center py-4 px-4 md:px-6 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
       <Link to="/" className="flex items-center gap-3 transition-transform hover:scale-105">
         <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-2.5 rounded-xl shadow-lg">
           <ChartLine className="h-5 w-5 text-white" />
@@ -41,7 +41,7 @@ const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
         </div>
       </Link>
       
-      <div className="fixed right-1/2 transform translate-x-1/2 z-20 top-16">
+      <div className="fixed left-1/2 transform -translate-x-1/2 z-20 top-16">
         {showPerformance && <DailyPerformance />}
         {showNotepad && <Notepad />}
       </div>

@@ -2,6 +2,7 @@
 import { formatScorePercent } from "@/services/scoreService";
 import { Score } from "@/types/offer";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 interface ScoreBadgeProps {
   score: Score;
@@ -25,31 +26,43 @@ const ScoreBadge = ({ score, size = 'md', showLabel = true, className }: ScoreBa
   };
   
   const sizeMap = {
-    sm: "h-10 w-10 text-sm",
+    sm: "h-8 w-8 text-xs",
     md: "h-16 w-16 text-base",
     lg: "h-24 w-24 text-xl"
   };
   
   return (
-    <div className={cn("flex flex-col items-center", className)}>
-      <div className={cn(
-        "rounded-full flex items-center justify-center font-semibold shadow-lg border-2",
-        "bg-gradient-to-br transition-all duration-300",
-        `${sizeMap[size]}`,
-        `${scoreColorMap[score.result]}`
-      )}>
-        {formatScorePercent(score.value)}
-      </div>
-      {showLabel && (
-        <span className={cn(
-          "mt-2 font-medium",
-          size === 'sm' ? "text-xs" : "text-sm",
-          scoreLabelColorMap[score.result]
-        )}>
-          {score.label}
-        </span>
-      )}
-    </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className={cn("flex flex-col items-center", className)}>
+            <div className={cn(
+              "rounded-full flex items-center justify-center font-semibold shadow-lg border-2",
+              "bg-gradient-to-br transition-all duration-300",
+              `${sizeMap[size]}`,
+              `${scoreColorMap[score.result]}`
+            )}>
+              {formatScorePercent(score.value)}
+            </div>
+            {showLabel && (
+              <span className={cn(
+                "mt-2 font-medium",
+                size === 'sm' ? "text-xs" : "text-sm",
+                scoreLabelColorMap[score.result]
+              )}>
+                {score.label}
+              </span>
+            )}
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <div className="text-center">
+            <p className="font-bold">{score.label}</p>
+            <p className="text-xs mt-1">Score: {score.value}%</p>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 

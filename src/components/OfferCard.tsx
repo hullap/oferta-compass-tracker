@@ -16,7 +16,8 @@ import {
   MessageSquare,
   ExternalLink,
   Clock,
-  RefreshCcw
+  RefreshCcw,
+  GripVertical
 } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "./ui/button";
@@ -40,6 +41,7 @@ interface OfferCardProps {
   isPinned?: boolean;
   isFavorite?: boolean;
   isArchived?: boolean;
+  viewMode?: "grid" | "list";
 }
 
 const OfferCard = ({ 
@@ -52,7 +54,8 @@ const OfferCard = ({
   onRefresh,
   isPinned = false,
   isFavorite = false,
-  isArchived = false
+  isArchived = false,
+  viewMode = "grid"
 }: OfferCardProps) => {
   const score = useMemo(() => calculateScore(offer), [offer]);
   const trend = useMemo(() => calculateTrend(offer), [offer]);
@@ -92,6 +95,160 @@ const OfferCard = ({
     e.stopPropagation();
     onRefresh && onRefresh();
   };
+
+  if (viewMode === "list") {
+    return (
+      <Card 
+        className={cn(
+          "overflow-hidden transition-all duration-300 hover:shadow-lg bg-gradient-to-br from-slate-900 to-slate-800 border group",
+          isPinned && "border-blue-500 shadow-blue-900/20 shadow-md",
+          isArchived && "opacity-60",
+          scoreBorderClass,
+          "hover:transform hover:scale-[1.01] hover:shadow-xl"
+        )}
+        onClick={() => onClick(offer)}
+      >
+        <div className="flex items-center p-3">
+          <div className="flex-shrink-0 mr-3 flex items-center">
+            <GripVertical size={16} className="mr-2 text-slate-600" />
+            <ScoreBadge score={score} size="sm" showLabel={false} />
+          </div>
+          
+          <div className="flex-1">
+            <div className="flex items-center">
+              <h3 className="font-bold flex items-center gap-1.5 text-slate-100 group-hover:text-white truncate text-sm">
+                {isPinned && <Pin size={14} className="text-blue-400 flex-shrink-0" />}
+                {isFavorite && <Star size={14} className="text-yellow-400 fill-yellow-400 flex-shrink-0" />}
+                <span className="truncate">{offer.name}</span>
+              </h3>
+            </div>
+            
+            <div className="flex items-center gap-2 mt-1 text-xs">
+              <div className="flex items-center gap-1 bg-slate-800/50 rounded-md px-2 py-0.5">
+                <span className="font-medium text-slate-300">Anúncios:</span>
+                <span className="font-bold text-white">{latestAds}</span>
+                {trend.direction !== 'stable' && (
+                  <span className={`ml-1 ${trendColor} flex items-center`}>
+                    {trend.direction === 'up' ? (
+                      <>
+                        <ArrowUp size={12} />
+                        <span className="ml-0.5 text-[10px]">{trend.percentage.toFixed(0)}%</span>
+                      </>
+                    ) : (
+                      <>
+                        <ArrowDown size={12} />
+                        <span className="ml-0.5 text-[10px]">{Math.abs(trend.percentage).toFixed(0)}%</span>
+                      </>
+                    )}
+                  </span>
+                )}
+              </div>
+              
+              {offer.totalPageAds !== undefined && offer.totalPageAds > 0 && (
+                <div className="flex items-center gap-1 bg-slate-800/50 rounded-md px-2 py-0.5">
+                  <span className="font-medium text-slate-300">Total:</span>
+                  <span className="font-bold text-emerald-400">{offer.totalPageAds}</span>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-1">
+                <ChartLine size={12} className="opacity-70" />
+                <span>{dayCount} dias</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2 ml-2">
+            <div className="hidden sm:flex flex-wrap gap-1">
+              {(offer.keywords || []).slice(0, 2).map((keyword, index) => (
+                <Badge 
+                  key={index}
+                  variant="outline" 
+                  className="text-xs py-0 h-5 bg-blue-900/20 text-blue-300 border-blue-700/50 hover:bg-blue-800/30"
+                >
+                  {keyword}
+                </Badge>
+              ))}
+              {(offer.keywords || []).length > 2 && (
+                <Badge 
+                  variant="outline" 
+                  className="text-xs py-0 h-5 bg-purple-900/20 text-purple-300 border-purple-700/50"
+                >
+                  +{(offer.keywords || []).length - 2}
+                </Badge>
+              )}
+            </div>
+            
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-7 w-7 hover:bg-slate-700 rounded-full"
+              onClick={handleRefresh}
+              title="Atualizar dados"
+            >
+              <RefreshCcw size={14} />
+            </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-slate-700 rounded-full">
+                  <MoreVertical size={14} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-44 border-slate-700 bg-slate-900">
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  onRefresh && onRefresh();
+                }}
+                className="hover:bg-slate-800 focus:bg-slate-800"
+                >
+                  <RefreshCcw className="mr-2 h-4 w-4" />
+                  Atualizar dados
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  onPin && onPin(offer);
+                }}
+                className="hover:bg-slate-800 focus:bg-slate-800"
+                >
+                  <Pin className="mr-2 h-4 w-4" />
+                  {isPinned ? "Desafixar" : "Fixar"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  onFavorite && onFavorite(offer);
+                }}
+                className="hover:bg-slate-800 focus:bg-slate-800"
+                >
+                  <Star className="mr-2 h-4 w-4" />
+                  {isFavorite ? "Remover favorito" : "Favoritar"}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation();
+                  onArchive && onArchive(offer);
+                }}
+                className="hover:bg-slate-800 focus:bg-slate-800"
+                >
+                  <Archive className="mr-2 h-4 w-4" />
+                  {isArchived ? "Desarquivar" : "Arquivar"}
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  className="text-red-400 hover:text-red-300 hover:bg-slate-800 focus:bg-slate-800" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete && onDelete(offer);
+                  }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Excluir
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </Card>
+    );
+  }
   
   return (
     <Card 
@@ -123,7 +280,7 @@ const OfferCard = ({
           )}
         </div>
         <div className="flex-shrink-0 absolute right-10 top-4">
-          <ScoreBadge score={score} size="sm" />
+          <ScoreBadge score={score} size="sm" showLabel={false} />
         </div>
         <div className="absolute right-2 top-4">
           <DropdownMenu>
