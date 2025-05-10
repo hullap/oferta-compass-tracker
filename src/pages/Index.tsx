@@ -101,13 +101,13 @@ const Index = () => {
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
-  // Handler para adicionar uma nova oferta
+  // Handler for adding a new offer
   const handleAddOffer = async (name: string, description: string, facebookAdLibraryUrl: string = "") => {
     await addOffer(name, description, "", "", [], facebookAdLibraryUrl);
     setIsCreatingOffer(false);
   };
 
-  // Handler para atualizar manualmente os dados
+  // Handler for updating manually the data
   const handleRefreshData = () => {
     setRefreshTimestamp(Date.now());
     refreshOffers();
