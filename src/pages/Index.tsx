@@ -114,7 +114,7 @@ const Index = () => {
     toast.success("Dados atualizados com sucesso!");
   };
 
-  // Fix the parameter in this function - remove the offer parameter if it's not needed
+  // Fix the handleRefreshOffer function to accept no parameters
   const handleRefreshOffer = () => {
     // Just update the timestamp to force recalculation of scores
     toast.success("Dados da oferta atualizados!");

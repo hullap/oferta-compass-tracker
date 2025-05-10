@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Navigate } from "react-router-dom";
 
 const Auth = () => {
-  // Update the mode state type to include "reset"
+  // Define the mode type to explicitly include "reset"
   const [mode, setMode] = useState<"login" | "signup" | "reset">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
