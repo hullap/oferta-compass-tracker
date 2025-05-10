@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { Offer } from "@/types/offer";
 import Header from "@/components/Header";
@@ -115,11 +114,10 @@ const Index = () => {
     toast.success("Dados atualizados com sucesso!");
   };
 
-  // Handler para atualizar uma oferta específica
-  const handleRefreshOffer = (offer: Offer) => {
-    // Aqui só atualizamos o timestamp para forçar um recalculo dos scores
-    // Em uma implementação futura pode ser feita uma atualização real dos dados
-    toast.success(`Dados da oferta "${offer.name}" atualizados!`);
+  // Fix the parameter in this function - remove the offer parameter if it's not needed
+  const handleRefreshOffer = () => {
+    // Just update the timestamp to force recalculation of scores
+    toast.success("Dados da oferta atualizados!");
     setRefreshTimestamp(Date.now());
   };
 
