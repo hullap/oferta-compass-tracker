@@ -15,11 +15,11 @@ interface PerformanceEntry {
   id: string;
   user_id: string;
   date: string;
-  yesterday_achievements: string;
-  today_goals: string;
-  missed_opportunities: string;
+  yesterday_achievements: string | null;
+  today_goals: string | null;
+  missed_opportunities: string | null;
   productivity_score: number;
-  reason: string;
+  reason: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -58,7 +58,7 @@ const DailyPerformance = () => {
         if (error) throw error;
         
         if (data) {
-          setTodayEntry(data);
+          setTodayEntry(data as PerformanceEntry);
           setFormData({
             yesterday_achievements: data.yesterday_achievements || "",
             today_goals: data.today_goals || "",
@@ -84,7 +84,7 @@ const DailyPerformance = () => {
         if (error) throw error;
         
         if (data) {
-          setPerformanceHistory(data);
+          setPerformanceHistory(data as PerformanceEntry[]);
         }
       } catch (error) {
         console.error('Erro ao buscar histórico:', error);
@@ -162,8 +162,8 @@ const DailyPerformance = () => {
         
         if (error) throw error;
         
-        setTodayEntry(data);
-        setPerformanceHistory(prev => [data, ...prev]);
+        setTodayEntry(data as PerformanceEntry);
+        setPerformanceHistory(prev => [data as PerformanceEntry, ...prev]);
         
         toast.success("Registro criado com sucesso!");
       }
@@ -177,7 +177,7 @@ const DailyPerformance = () => {
     }
   };
   
-  const renderScoreStars = (score: number) => {
+  const renderScoreStars = () => {
     const stars = [];
     for (let i = 1; i <= 10; i++) {
       stars.push(
@@ -303,7 +303,7 @@ const DailyPerformance = () => {
               <div className="space-y-2">
                 <Label>Produtividade hoje (1-10)</Label>
                 <div className="flex flex-wrap gap-1 justify-center">
-                  {renderScoreStars(formData.productivity_score)}
+                  {renderScoreStars()}
                 </div>
               </div>
               

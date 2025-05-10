@@ -92,6 +92,45 @@ export type Database = {
         }
         Relationships: []
       }
+      performance: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          missed_opportunities: string | null
+          productivity_score: number
+          reason: string | null
+          today_goals: string | null
+          updated_at: string
+          user_id: string
+          yesterday_achievements: string | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          missed_opportunities?: string | null
+          productivity_score?: number
+          reason?: string | null
+          today_goals?: string | null
+          updated_at?: string
+          user_id: string
+          yesterday_achievements?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          missed_opportunities?: string | null
+          productivity_score?: number
+          reason?: string | null
+          today_goals?: string | null
+          updated_at?: string
+          user_id?: string
+          yesterday_achievements?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
