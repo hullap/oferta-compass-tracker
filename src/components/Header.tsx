@@ -1,9 +1,11 @@
 
-import { ChartLine, Plus, LogOut, RefreshCcw } from "lucide-react";
+import { ChartLine, Plus, LogOut, RefreshCcw, NoteText } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import DailyPerformance from "./DailyPerformance";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Notepad } from "./Notepad";
 
 interface HeaderProps {
   onNewOfferClick: () => void;
@@ -19,6 +22,8 @@ interface HeaderProps {
 
 const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
   const { user, signOut } = useAuth();
+  const [showPerformance, setShowPerformance] = useState(false);
+  const [showNotepad, setShowNotepad] = useState(false);
   
   const userInitials = user?.email 
     ? user.email.substring(0, 2).toUpperCase() 
@@ -36,6 +41,11 @@ const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
         </div>
       </Link>
       
+      <div className="fixed right-1/2 transform translate-x-1/2 z-20 top-16">
+        {showPerformance && <DailyPerformance />}
+        {showNotepad && <Notepad />}
+      </div>
+      
       <div className="flex items-center gap-3">
         {onRefreshData && (
           <Button
@@ -48,6 +58,31 @@ const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
             <RefreshCcw className="h-4 w-4" />
           </Button>
         )}
+        
+        <Button 
+          variant="outline" 
+          size="sm"
+          className={`border ${showPerformance ? 'border-blue-500 bg-blue-900/20' : 'border-slate-700'} hover:border-blue-500 hover:bg-slate-800`}
+          onClick={() => {
+            setShowPerformance(!showPerformance);
+            if (!showPerformance) setShowNotepad(false);
+          }}
+        >
+          Desempenho
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          size="sm"
+          className={`border ${showNotepad ? 'border-purple-500 bg-purple-900/20' : 'border-slate-700'} hover:border-purple-500 hover:bg-slate-800`}
+          onClick={() => {
+            setShowNotepad(!showNotepad);
+            if (!showNotepad) setShowPerformance(false);
+          }}
+        >
+          <NoteText className="mr-1 h-4 w-4" />
+          Notas
+        </Button>
         
         <Button 
           onClick={onNewOfferClick} 
