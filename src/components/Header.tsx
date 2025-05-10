@@ -1,5 +1,5 @@
 
-import { ChartLine, Plus, LogOut, RefreshCcw, NoteText } from "lucide-react";
+import { ChartLine, Plus, LogOut, RefreshCcw, FileText } from "lucide-react";
 import { Button } from "./ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { Avatar, AvatarFallback } from "./ui/avatar";
@@ -80,7 +80,7 @@ const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
             if (!showNotepad) setShowPerformance(false);
           }}
         >
-          <NoteText className="mr-1 h-4 w-4" />
+          <FileText className="mr-1 h-4 w-4" />
           Notas
         </Button>
         

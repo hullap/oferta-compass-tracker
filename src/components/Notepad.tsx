@@ -4,7 +4,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, NoteText, Pencil } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, FileText, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -36,21 +36,29 @@ export const Notepad = () => {
     
     try {
       const { data, error } = await supabase
-        .from('notes')
+        .from('performance')
         .select('*')
         .eq('user_id', user.id)
+        .eq('reason', 'note')
         .order('updated_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
       
-      if (error && error.code !== 'PGRST116') {
-        throw error;
-      }
+      if (error) throw error;
       
       if (data) {
-        setSavedNote(data);
-        setTitle(data.title);
-        setContent(data.content);
+        // Convert performance record to a note format
+        const noteData: Note = {
+          id: data.id,
+          title: data.today_goals || "Nota sem título",
+          content: data.yesterday_achievements || "",
+          created_at: data.created_at,
+          updated_at: data.updated_at
+        };
+        
+        setSavedNote(noteData);
+        setTitle(noteData.title);
+        setContent(noteData.content);
       }
     } catch (error) {
       console.error('Erro ao buscar notas:', error);
@@ -66,38 +74,61 @@ export const Notepad = () => {
     setLoading(true);
     
     try {
-      const noteData = {
-        title,
-        content,
-        user_id: user.id,
-      };
-      
-      let response;
+      const today = new Date().toISOString().split('T')[0];
       
       if (savedNote) {
-        response = await supabase
-          .from('notes')
+        // Update existing note using the performance table
+        const { error } = await supabase
+          .from('performance')
           .update({
-            ...noteData,
-            updated_at: new Date().toISOString(),
+            today_goals: title,
+            yesterday_achievements: content,
+            reason: 'note',
+            updated_at: new Date().toISOString()
           })
           .eq('id', savedNote.id)
-          .select()
-          .single();
+          .select();
+        
+        if (error) throw error;
+        
+        setSavedNote({
+          ...savedNote,
+          title,
+          content,
+          updated_at: new Date().toISOString()
+        });
+        
+        toast.success("Nota salva com sucesso!");
       } else {
-        response = await supabase
-          .from('notes')
+        // Create new note using the performance table
+        const { data, error } = await supabase
+          .from('performance')
           .insert({
-            ...noteData,
+            user_id: user.id,
+            date: today,
+            today_goals: title,
+            yesterday_achievements: content,
+            productivity_score: 5,  // Default value required by the schema
+            reason: 'note'
           })
           .select()
           .single();
+        
+        if (error) throw error;
+        
+        // Convert to note format
+        const newNote: Note = {
+          id: data.id,
+          title: data.today_goals || "",
+          content: data.yesterday_achievements || "",
+          created_at: data.created_at,
+          updated_at: data.updated_at
+        };
+        
+        setSavedNote(newNote);
+        toast.success("Nota criada com sucesso!");
       }
       
-      if (response.error) throw response.error;
-      
-      setSavedNote(response.data);
-      toast.success("Nota salva com sucesso!");
       setIsEditing(false);
     } catch (error: any) {
       toast.error(`Erro ao salvar nota: ${error.message}`);
@@ -180,7 +211,7 @@ export const Notepad = () => {
     <Card className="w-96 border border-slate-700 overflow-hidden shadow-xl">
       <CardHeader className="pb-2 flex flex-row justify-between items-center">
         <CardTitle className="text-lg flex items-center gap-2">
-          <NoteText className="h-5 w-5 text-purple-400" />
+          <FileText className="h-5 w-5 text-purple-400" />
           <span>Bloco de Notas</span>
         </CardTitle>
         <Button 
