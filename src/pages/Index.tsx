@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { Offer } from "@/types/offer";
 import Header from "@/components/Header";
@@ -199,7 +198,7 @@ const Index = () => {
     toast.info("Reordenação manual implementada com sucesso!");
   };
   
-  // Gerar uma lista de todas as tags únicas para filtros
+  // Gerar uma lista de todas as tags ��nicas para filtros
   const allTags = [...new Set(offers.flatMap(o => o.keywords || []))];
 
   return (
