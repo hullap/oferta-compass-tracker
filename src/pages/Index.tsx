@@ -84,7 +84,7 @@ const Index = () => {
       );
       
       if (!(offer.name.toLowerCase().includes(term) || 
-            offer.description.toLowerCase().includes(term) ||
+            offer.description?.toLowerCase().includes(term) ||
             keywordsMatch)) {
         return false;
       }
@@ -182,7 +182,7 @@ const Index = () => {
     toast.success("Dados atualizados com sucesso!");
   };
 
-  // Handler to refresh card data (no parameters)
+  // Handler to refresh card data (fixed to remove parameter)
   const handleRefreshOffer = () => {
     // Just update the timestamp to force recalculation of scores
     toast.success("Dados da oferta atualizados!");
@@ -254,49 +254,38 @@ const Index = () => {
                   </Button>
                 </div>
                 
-                {/* Botão de ordenação */}
+                {/* Menu de filtros (compactado) */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="border-gray-700">
-                      <ArrowUpDown className="mr-2 h-4 w-4" />
-                      {sortCriteria === "score" && "Por score"}
-                      {sortCriteria === "adsCount" && "Por anúncios"}
-                      {sortCriteria === "trend" && "Por crescimento"}
-                      {sortCriteria === "name" && "Por nome"}
-                      {sortCriteria === "updated" && "Por atualização"}
-                      {sortDirection === "desc" ? " (desc)" : " (asc)"}
+                      <Filter className="mr-2 h-4 w-4" />
+                      Filtros
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Ordenação</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
                     <DropdownMenuRadioGroup value={sortCriteria} onValueChange={(value) => setSortCriteria(value as any)}>
-                      <DropdownMenuRadioItem value="score">Score (qualidade)</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="adsCount">Número de anúncios</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="trend">Taxa de crescimento</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="name">Nome</DropdownMenuRadioItem>
-                      <DropdownMenuRadioItem value="updated">Data de atualização</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="score">Por score (qualidade)</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="adsCount">Por número de anúncios</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="trend">Por taxa de crescimento</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="name">Por nome</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="updated">Por data de atualização</DropdownMenuRadioItem>
                     </DropdownMenuRadioGroup>
                     
                     <DropdownMenuSeparator />
-                    
                     <DropdownMenuLabel>Direção</DropdownMenuLabel>
                     <DropdownMenuRadioGroup value={sortDirection} onValueChange={(value) => setSortDirection(value as any)}>
                       <DropdownMenuRadioItem value="desc">Decrescente</DropdownMenuRadioItem>
                       <DropdownMenuRadioItem value="asc">Crescente</DropdownMenuRadioItem>
                     </DropdownMenuRadioGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                
-                {/* Filtros avançados */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="border-gray-700">
-                      <Filter className="h-4 w-4 mr-2" />
-                      Filtros avançados
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
+                    
+                    <DropdownMenuSeparator />
                     <DropdownMenuLabel>Número de anúncios</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => setAdvancedFilters(prev => ({...prev, minAds: 0}))}>
+                      <Hash className="h-4 w-4 mr-2" />
+                      Todos os anúncios
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setAdvancedFilters(prev => ({...prev, minAds: 1}))}>
                       <Hash className="h-4 w-4 mr-2" />
                       Mínimo de 1 anúncio
@@ -311,7 +300,6 @@ const Index = () => {
                     </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />
-                    
                     <DropdownMenuLabel>Atualizações recentes</DropdownMenuLabel>
                     <DropdownMenuItem onClick={() => setAdvancedFilters(prev => ({...prev, lastUpdated: 1}))}>
                       <Calendar className="h-4 w-4 mr-2" />
@@ -323,37 +311,37 @@ const Index = () => {
                     </DropdownMenuItem>
                     
                     <DropdownMenuSeparator />
-                    
                     <DropdownMenuLabel>Crescimento</DropdownMenuLabel>
                     <DropdownMenuItem onClick={() => setSortCriteria("trend")}>
                       <TrendingUp className="h-4 w-4 mr-2" />
                       Ordenar por crescimento
                     </DropdownMenuItem>
                     
-                    <DropdownMenuSeparator />
-                    
                     {allTags.length > 0 && (
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger>
-                          <Tag className="h-4 w-4 mr-2" />
-                          Filtrar por tags
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuSubContent>
-                          {allTags.map(tag => (
-                            <DropdownMenuItem 
-                              key={tag}
-                              onClick={() => setAdvancedFilters(prev => ({
-                                ...prev, 
-                                tags: prev.tags.includes(tag) 
-                                  ? prev.tags.filter(t => t !== tag) 
-                                  : [...prev.tags, tag]
-                              }))}
-                            >
-                              {advancedFilters.tags.includes(tag) ? "✓ " : ""}{tag}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuSubContent>
-                      </DropdownMenuSub>
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger>
+                            <Tag className="h-4 w-4 mr-2" />
+                            Filtrar por tags
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent>
+                            {allTags.map(tag => (
+                              <DropdownMenuItem 
+                                key={tag}
+                                onClick={() => setAdvancedFilters(prev => ({
+                                  ...prev, 
+                                  tags: prev.tags.includes(tag) 
+                                    ? prev.tags.filter(t => t !== tag) 
+                                    : [...prev.tags, tag]
+                                }))}
+                              >
+                                {advancedFilters.tags.includes(tag) ? "✓ " : ""}{tag}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                      </>
                     )}
                     
                     <DropdownMenuSeparator />

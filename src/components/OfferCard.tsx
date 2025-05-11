@@ -108,13 +108,13 @@ const OfferCard = ({
         )}
         onClick={() => onClick(offer)}
       >
-        <div className="flex items-center p-3">
+        <div className="flex items-center p-3 overflow-hidden">
           <div className="flex-shrink-0 mr-3 flex items-center">
             <GripVertical size={16} className="mr-2 text-slate-600" />
             <ScoreBadge score={score} size="sm" showLabel={false} />
           </div>
           
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex items-center">
               <h3 className="font-bold flex items-center gap-1.5 text-slate-100 group-hover:text-white truncate text-sm">
                 {isPinned && <Pin size={14} className="text-blue-400 flex-shrink-0" />}
@@ -124,7 +124,7 @@ const OfferCard = ({
             </div>
             
             <div className="flex items-center gap-2 mt-1 text-xs">
-              <div className="flex items-center gap-1 bg-slate-800/50 rounded-md px-2 py-0.5">
+              <div className="flex items-center gap-1 bg-slate-800/50 rounded-md px-2 py-0.5 truncate">
                 <span className="font-medium text-slate-300">Anúncios:</span>
                 <span className="font-bold text-white">{latestAds}</span>
                 {trend.direction !== 'stable' && (
@@ -145,7 +145,7 @@ const OfferCard = ({
               </div>
               
               {offer.totalPageAds !== undefined && offer.totalPageAds > 0 && (
-                <div className="flex items-center gap-1 bg-slate-800/50 rounded-md px-2 py-0.5">
+                <div className="flex items-center gap-1 bg-slate-800/50 rounded-md px-2 py-0.5 truncate">
                   <span className="font-medium text-slate-300">Total:</span>
                   <span className="font-bold text-emerald-400">{offer.totalPageAds}</span>
                 </div>
@@ -155,10 +155,20 @@ const OfferCard = ({
                 <ChartLine size={12} className="opacity-70" />
                 <span>{dayCount} dias</span>
               </div>
+              
+              {offer.facebookAdLibraryUrl && (
+                <div 
+                  onClick={openAdLibraryUrl}
+                  className="text-xs text-blue-400 flex items-center gap-1 cursor-pointer hover:text-blue-300 hover:underline transition-colors"
+                >
+                  <ExternalLink size={12} />
+                  <span className="truncate">Facebook</span>
+                </div>
+              )}
             </div>
           </div>
           
-          <div className="flex items-center gap-2 ml-2">
+          <div className="flex items-center gap-2 ml-2 flex-shrink-0">
             <div className="hidden sm:flex flex-wrap gap-1">
               {(offer.keywords || []).slice(0, 2).map((keyword, index) => (
                 <Badge 
@@ -279,7 +289,7 @@ const OfferCard = ({
             </div>
           )}
         </div>
-        <div className="flex-shrink-0 absolute right-10 top-4">
+        <div className="flex-shrink-0">
           <ScoreBadge score={score} size="sm" showLabel={false} />
         </div>
         <div className="absolute right-2 top-4">

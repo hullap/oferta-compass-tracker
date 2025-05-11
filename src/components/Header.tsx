@@ -30,7 +30,7 @@ const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
     : "U";
     
   return (
-    <header className="flex justify-between items-center py-4 px-4 md:px-6 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+    <header className="flex justify-between items-center py-4 px-4 md:px-6 border-b border-slate-800 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-800 sticky top-0 z-50 backdrop-blur-md bg-opacity-90 relative">
       <Link to="/" className="flex items-center gap-3 transition-transform hover:scale-105">
         <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-2.5 rounded-xl shadow-lg">
           <ChartLine className="h-5 w-5 text-white" />
@@ -102,7 +102,7 @@ const Header = ({ onNewOfferClick, onRefreshData }: HeaderProps) => {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 border border-slate-700 bg-slate-900 shadow-xl">
+          <DropdownMenuContent align="end" className="w-56 border border-slate-700 bg-slate-900 shadow-xl z-50">
             <div className="px-4 py-3 border-b border-slate-700">
               <p className="text-sm font-medium text-slate-100">{user?.email}</p>
               <p className="text-xs text-slate-400 mt-1">Conta logada</p>

@@ -87,6 +87,11 @@ const OfferDetails = ({
     
     onUpdateAdData(offer.id, adData.activeAds, adData.date, editingObservation.value, adData.time);
     setEditingObservation(null);
+    
+    // Use setTimeout to avoid any UI freezing after saving
+    setTimeout(() => {
+      toast.success("Observação atualizada com sucesso!");
+    }, 100);
   };
   
   // Save total page ads
@@ -182,6 +187,23 @@ const OfferDetails = ({
         </div>
       )}
 
+      {/* Ad Data Form at the top for easy access */}
+      <Card className="border border-gray-800 card-gradient bg-gradient-to-br from-indigo-950/30 to-slate-900">
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <ChartBar size={18} className="text-blue-400" />
+            Registrar anúncios para hoje
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AdDataForm 
+            offerId={offer.id} 
+            offerName={offer.name}
+            onSave={onUpdateAdData} 
+          />
+        </CardContent>
+      </Card>
+
       <Tabs
         defaultValue="analytics"
         value={activeTab}
@@ -238,72 +260,76 @@ const OfferDetails = ({
                   
                   {offer.adData.length > 0 ? (
                     <div className="space-y-3">
-                      {offer.adData.map((data, index) => (
-                        <div key={data.date} className="bg-glass rounded-lg p-3">
-                          <div className="flex justify-between items-center mb-1">
-                            <div className="flex items-center gap-2">
-                              <Calendar size={14} className="text-muted-foreground" />
-                              <span className="text-sm">{new Date(data.date).toLocaleDateString('pt-BR')}</span>
-                              <span className="text-xs text-muted-foreground">{data.time || ""}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span className="text-sm">{data.activeAds} anúncios</span>
-                              {onDeleteAdData ? (
-                                <AdDataEntryActions 
-                                  adData={data}
-                                  onUpdate={handleUpdateAdData}
-                                  onDelete={handleDeleteAdData}
-                                />
-                              ) : (
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-6 w-6"
-                                  onClick={() => setEditingObservation({
-                                    index,
-                                    value: data.observation || ""
-                                  })}
-                                >
-                                  <Edit2 size={14} />
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                          
-                          {editingObservation !== null && editingObservation.index === index ? (
-                            <div className="space-y-2">
-                              <Textarea
-                                value={editingObservation.value}
-                                onChange={(e) => setEditingObservation({
-                                  ...editingObservation,
-                                  value: e.target.value
-                                })}
-                                className="border-gray-700 text-sm min-h-[60px]"
-                                placeholder="Adicionar observação..."
-                              />
-                              <div className="flex justify-end gap-2">
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => setEditingObservation(null)}
-                                >
-                                  Cancelar
-                                </Button>
-                                <Button 
-                                  size="sm"
-                                  onClick={() => saveObservationEdit(index)}
-                                >
-                                  Salvar
-                                </Button>
+                      {offer.adData.map((data, index) => {
+                        // Corrigir o formato da data para exibição
+                        const displayDate = new Date(data.date);
+                        return (
+                          <div key={data.date} className="bg-glass rounded-lg p-3">
+                            <div className="flex justify-between items-center mb-1">
+                              <div className="flex items-center gap-2">
+                                <Calendar size={14} className="text-muted-foreground" />
+                                <span className="text-sm">{displayDate.toLocaleDateString('pt-BR')}</span>
+                                <span className="text-xs text-muted-foreground">{data.time || ""}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <span className="text-sm">{data.activeAds} anúncios</span>
+                                {onDeleteAdData ? (
+                                  <AdDataEntryActions 
+                                    adData={data}
+                                    onUpdate={handleUpdateAdData}
+                                    onDelete={handleDeleteAdData}
+                                  />
+                                ) : (
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="h-6 w-6"
+                                    onClick={() => setEditingObservation({
+                                      index,
+                                      value: data.observation || ""
+                                    })}
+                                  >
+                                    <Edit2 size={14} />
+                                  </Button>
+                                )}
                               </div>
                             </div>
-                          ) : (
-                            <p className="text-sm text-muted-foreground">
-                              {data.observation ? data.observation : "Sem observações para este dia"}
-                            </p>
-                          )}
-                        </div>
-                      ))}
+                            
+                            {editingObservation !== null && editingObservation.index === index ? (
+                              <div className="space-y-2">
+                                <Textarea
+                                  value={editingObservation.value}
+                                  onChange={(e) => setEditingObservation({
+                                    ...editingObservation,
+                                    value: e.target.value
+                                  })}
+                                  className="border-gray-700 text-sm min-h-[60px]"
+                                  placeholder="Adicionar observação..."
+                                />
+                                <div className="flex justify-end gap-2">
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
+                                    onClick={() => setEditingObservation(null)}
+                                  >
+                                    Cancelar
+                                  </Button>
+                                  <Button 
+                                    size="sm"
+                                    onClick={() => saveObservationEdit(index)}
+                                  >
+                                    Salvar
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-muted-foreground">
+                                {data.observation ? data.observation : "Sem observações para este dia"}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground">
@@ -456,13 +482,6 @@ const OfferDetails = ({
                   <AdDataCalendar adData={offer.adData} />
                 </CardContent>
               </Card>
-              
-              {/* Ad Data Form */}
-              <AdDataForm 
-                offerId={offer.id} 
-                offerName={offer.name}
-                onSave={onUpdateAdData} 
-              />
             </div>
           </div>
         </TabsContent>
