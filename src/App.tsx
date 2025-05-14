@@ -12,6 +12,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AppSidebar from "./components/AppSidebar";
 import "./App.css";
 import { useState } from "react";
+import OffersPage from "./pages/OffersPage";
+import AnalyticsPage from "./pages/AnalyticsPage";
+import NotesPage from "./pages/NotesPage";
 
 const queryClient = new QueryClient();
 
@@ -43,10 +46,10 @@ const App = () => {
                         <AppSidebar onNewOfferClick={handleNewOfferClick} />
                         <main className="main-content">
                           <Routes>
-                            <Route 
-                              path="/" 
-                              element={<Index />} 
-                            />
+                            <Route path="/" element={<Index />} />
+                            <Route path="/offers" element={<OffersPage />} />
+                            <Route path="/analytics" element={<AnalyticsPage />} />
+                            <Route path="/notes" element={<NotesPage />} />
                             <Route path="*" element={<NotFound />} />
                           </Routes>
                         </main>
