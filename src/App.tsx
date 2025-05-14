@@ -11,37 +11,56 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AppSidebar from "./components/AppSidebar";
 import "./App.css";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <div className="app-layout">
-            <AppSidebar />
-            <main className="main-content">
+const App = () => {
+  const [isCreatingOffer, setIsCreatingOffer] = useState(false);
+
+  const handleNewOfferClick = () => {
+    setIsCreatingOffer(true);
+  };
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <div className="app-layout">
               <Routes>
                 <Route 
-                  path="/" 
+                  path="/auth" 
+                  element={<Auth />} 
+                />
+                <Route
+                  path="*"
                   element={
                     <ProtectedRoute>
-                      <Index />
+                      <div className="app-layout">
+                        <AppSidebar onNewOfferClick={handleNewOfferClick} />
+                        <main className="main-content">
+                          <Routes>
+                            <Route 
+                              path="/" 
+                              element={<Index />} 
+                            />
+                            <Route path="*" element={<NotFound />} />
+                          </Routes>
+                        </main>
+                      </div>
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="*" element={<NotFound />} />
               </Routes>
-            </main>
-          </div>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+            </div>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import { Offer } from "@/types/offer";
 import Header from "@/components/Header";
@@ -207,12 +208,14 @@ const Index = () => {
     const active = offers.filter(o => !archivedOffers.has(o.id)).length;
     const favorite = offers.filter(o => favoriteOffers.has(o.id)).length;
     const pinned = offers.filter(o => pinnedOffers.has(o.id)).length;
+    const archived = offers.filter(o => archivedOffers.has(o.id)).length;
     
     return {
       total,
       active,
       favorite,
-      pinned
+      pinned,
+      archived
     };
   };
   
@@ -241,6 +244,7 @@ const Index = () => {
           setIsCreatingOffer(true);
         }} 
         onRefreshData={handleRefreshData}
+        minimal={true}
       />
       
       <main className="content-wrapper">

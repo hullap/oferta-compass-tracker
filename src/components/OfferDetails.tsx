@@ -48,6 +48,10 @@ const OfferDetails = ({
   const [keywords, setKeywords] = useState<string[]>(offer.keywords || []);
   const [facebookAdLibraryUrl, setFacebookAdLibraryUrl] = useState(offer.facebookAdLibraryUrl || "");
   const [activeTab, setActiveTab] = useState<"analytics" | "tasks">("analytics");
+  const [totalPageAdsHistory, setTotalPageAdsHistory] = useState<{date: string, count: number}[]>(
+    // Initialize with current totalPageAds if available
+    offer.totalPageAds ? [{date: new Date().toISOString().split('T')[0], count: offer.totalPageAds}] : []
+  );
   
   // Use our tasks hook to manage tasks for this offer
   const { 
@@ -94,7 +98,7 @@ const OfferDetails = ({
     }, 100);
   };
   
-  // Save total page ads
+  // Save total page ads with history
   const handleSaveTotalPageAds = () => {
     if (!onUpdateTotalPageAds) return;
     
@@ -104,7 +108,22 @@ const OfferDetails = ({
       return;
     }
     
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Add to history
+    const newHistory = [
+      ...totalPageAdsHistory,
+      { date: today, count: count }
+    ];
+    
+    // Sort history by date
+    newHistory.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    setTotalPageAdsHistory(newHistory);
     onUpdateTotalPageAds(offer.id, count);
+    
+    toast.success("Total de anúncios da página atualizado e adicionado ao histórico!");
   };
   
   // Handle update for ad data
@@ -187,15 +206,15 @@ const OfferDetails = ({
         </div>
       )}
 
-      {/* Ad Data Form - back to its original position */}
-      <Card className="border border-gray-800 card-gradient bg-gradient-to-br from-indigo-950/30 to-slate-900 ad-form-card">
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <ChartBar size={18} className="text-blue-400" />
+      {/* Ad Data Form - melhorado visualmente */}
+      <Card className="ad-form-card">
+        <CardHeader className="card-header">
+          <CardTitle className="text-lg font-medium flex items-center gap-2">
+            <ChartBar size={18} className="text-red-400" />
             Registrar anúncios para hoje
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="card-content">
           <AdDataForm 
             offerId={offer.id} 
             offerName={offer.name}
@@ -365,7 +384,7 @@ const OfferDetails = ({
                 </CardContent>
               </Card>
               
-              {/* Total Page Ads Card */}
+              {/* Total Page Ads Card com histórico */}
               <Card className="border border-gray-800 card-gradient">
                 <CardHeader>
                   <CardTitle className="text-base">Anúncios da Página</CardTitle>
@@ -388,14 +407,40 @@ const OfferDetails = ({
                           placeholder="Total de anúncios da página"
                           value={totalPageAds}
                           onChange={(e) => setTotalPageAds(e.target.value)}
-                          className="border-gray-700"
+                          className="border-gray-700 form-control"
                         />
-                        <Button onClick={handleSaveTotalPageAds}>Salvar</Button>
+                        <Button 
+                          onClick={handleSaveTotalPageAds}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Salvar
+                        </Button>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Registre aqui o número total de anúncios ativos da página, independente da oferta específica.
                       </p>
                     </div>
+                    
+                    {/* Histórico de Total Page Ads */}
+                    {totalPageAdsHistory.length > 0 && (
+                      <div className="space-y-2 mt-4">
+                        <h4 className="text-sm font-medium">Histórico de anúncios da página</h4>
+                        <div className="space-y-1 max-h-[150px] overflow-y-auto pr-2">
+                          {totalPageAdsHistory.map((entry, index) => {
+                            const entryDate = new Date(entry.date);
+                            return (
+                              <div 
+                                key={index} 
+                                className="flex justify-between items-center text-xs p-2 bg-slate-800/40 rounded"
+                              >
+                                <span>{entryDate.toLocaleDateString('pt-BR')}</span>
+                                <span className="font-medium">{entry.count} anúncios</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                     
                     <div className="space-y-2">
                       <Label htmlFor="facebookAdLibraryUrl" className="flex items-center gap-2">
@@ -409,9 +454,14 @@ const OfferDetails = ({
                           placeholder="URL da biblioteca de anúncios do Facebook"
                           value={facebookAdLibraryUrl}
                           onChange={(e) => setFacebookAdLibraryUrl(e.target.value)}
-                          className="border-gray-700"
+                          className="border-gray-700 form-control"
                         />
-                        <Button onClick={handleSaveFacebookAdLibraryUrl}>Salvar</Button>
+                        <Button 
+                          onClick={handleSaveFacebookAdLibraryUrl}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Salvar
+                        </Button>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Insira o link da biblioteca de anúncios do Facebook para acessar rapidamente.
@@ -439,9 +489,14 @@ const OfferDetails = ({
                           placeholder="Nova tag"
                           value={newKeyword}
                           onChange={(e) => setNewKeyword(e.target.value)}
-                          className="border-gray-700"
+                          className="border-gray-700 form-control"
                         />
-                        <Button onClick={addKeyword}>Adicionar</Button>
+                        <Button 
+                          onClick={addKeyword}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Adicionar
+                        </Button>
                       </div>
                       <p className="text-xs text-muted-foreground">
                         Registre as tags para categorizar e encontrar esta oferta facilmente.

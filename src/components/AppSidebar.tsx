@@ -8,15 +8,41 @@ import {
   Package, 
   Users, 
   Settings,
-  ChevronDown
+  ChevronDown,
+  Plus, 
+  RefreshCcw,
+  FileText,
+  ChartBar
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "./ui/button";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
-const AppSidebar = () => {
+interface AppSidebarProps {
+  onNewOfferClick?: () => void;
+  onRefreshData?: () => void;
+}
+
+const AppSidebar = ({ onNewOfferClick, onRefreshData }: AppSidebarProps) => {
   const location = useLocation();
+  const { user } = useAuth();
   
   const isActive = (path: string) => {
     return location.pathname === path;
+  };
+
+  const handleNewOfferClick = () => {
+    if (onNewOfferClick) {
+      onNewOfferClick();
+    }
+  };
+
+  const handleRefreshData = () => {
+    if (onRefreshData) {
+      onRefreshData();
+      toast.success("Dados atualizados com sucesso!");
+    }
   };
   
   return (
@@ -29,8 +55,28 @@ const AppSidebar = () => {
           OfferTracker
         </div>
       </div>
+
+      {/* Botões de ação principais */}
+      <div className="px-4 py-3 space-y-3">
+        <Button 
+          onClick={handleNewOfferClick} 
+          className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 shadow-md hover:shadow-lg transition-all"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Nova Oferta
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          className="w-full border-indigo-900/50 hover:border-indigo-700 hover:bg-indigo-900/20"
+          onClick={handleRefreshData}
+        >
+          <RefreshCcw className="h-4 w-4 mr-2" />
+          Atualizar Dados
+        </Button>
+      </div>
       
-      <div className="mt-6">
+      <div className="mt-4">
         <ul>
           <SidebarItem 
             icon={<LayoutDashboard size={18} />} 
@@ -43,12 +89,28 @@ const AppSidebar = () => {
             label="Ofertas" 
             path="/offers" 
             active={isActive("/offers")} 
+            onClick={() => toast.info("Página de ofertas em construção")}
           />
           <SidebarItem 
             icon={<PieChart size={18} />} 
             label="Análises" 
             path="/analytics" 
             active={isActive("/analytics")} 
+            onClick={() => toast.info("Página de análises em construção")}
+          />
+          <SidebarItem 
+            icon={<ChartBar size={18} />} 
+            label="Desempenho" 
+            path="/performance" 
+            active={isActive("/performance")}
+            onClick={() => toast.info("Página de desempenho em construção")} 
+          />
+          <SidebarItem 
+            icon={<FileText size={18} />} 
+            label="Notas" 
+            path="/notes" 
+            active={isActive("/notes")}
+            onClick={() => toast.info("Página de notas em construção")} 
           />
           
           <div className="px-4 pt-6 pb-2 text-xs uppercase text-gray-400">
@@ -60,26 +122,43 @@ const AppSidebar = () => {
             label="Categorias" 
             path="/categories" 
             active={isActive("/categories")} 
+            onClick={() => toast.info("Página de categorias em construção")}
           />
           <SidebarItem 
             icon={<Package size={18} />} 
             label="Produtos" 
             path="/products" 
             active={isActive("/products")} 
+            onClick={() => toast.info("Página de produtos em construção")}
           />
           <SidebarItem 
             icon={<Users size={18} />} 
             label="Usuários" 
             path="/users" 
             active={isActive("/users")} 
+            onClick={() => toast.info("Página de usuários em construção")}
           />
           <SidebarItem 
             icon={<Settings size={18} />} 
             label="Configurações" 
             path="/settings" 
             active={isActive("/settings")} 
+            onClick={() => toast.info("Página de configurações em construção")}
           />
         </ul>
+      </div>
+      
+      {/* User info */}
+      <div className="mt-auto p-4 border-t border-gray-800">
+        <div className="flex items-center">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-red-700 flex items-center justify-center text-white text-sm font-medium mr-3">
+            {user?.email ? user.email.substring(0, 2).toUpperCase() : "U"}
+          </div>
+          <div className="overflow-hidden">
+            <p className="text-sm text-white truncate">{user?.email}</p>
+            <p className="text-xs text-gray-400">Online</p>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -91,20 +170,28 @@ interface SidebarItemProps {
   path: string;
   active?: boolean;
   hasChildren?: boolean;
+  onClick?: () => void;
 }
 
-const SidebarItem = ({ icon, label, path, active, hasChildren }: SidebarItemProps) => {
+const SidebarItem = ({ icon, label, path, active, hasChildren, onClick }: SidebarItemProps) => {
+  const handleClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      e.preventDefault();
+      onClick();
+    }
+  };
+  
   return (
     <li className={cn(
       "relative py-2 px-4 flex items-center",
-      active ? "bg-indigo-900/30 text-white" : "text-gray-400 hover:bg-indigo-900/20 hover:text-white"
+      active ? "bg-red-900/30 text-white" : "text-gray-400 hover:bg-red-900/20 hover:text-white"
     )}>
-      <Link to={path} className="flex items-center w-full">
+      <Link to={path} className="flex items-center w-full" onClick={handleClick}>
         <span className="mr-3">{icon}</span>
         <span>{label}</span>
         {hasChildren && <ChevronDown size={14} className="ml-auto" />}
       </Link>
-      {active && <div className="absolute left-0 top-0 h-full w-1 bg-indigo-500"></div>}
+      {active && <div className="absolute left-0 top-0 h-full w-1 bg-red-500"></div>}
     </li>
   );
 };

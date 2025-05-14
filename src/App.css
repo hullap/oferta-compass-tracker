@@ -12,16 +12,25 @@
 }
 
 .sidebar {
-  width: 240px;
-  background-color: #1a2035;
+  width: 280px;
+  background-color: #1a1e2c;
   color: #fff;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  border-right: 1px solid #2a2e3c;
+  overflow-y: auto;
 }
 
 .main-content {
   flex: 1;
   background-color: #131b30;
-  padding: 0;
+  min-height: 100vh;
 }
 
 .dashboard-cards {
@@ -32,9 +41,16 @@
 }
 
 .dashboard-card {
-  border-radius: 8px;
+  border-radius: 12px;
   padding: 20px;
   color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
 }
 
 .card-purple {
@@ -77,7 +93,65 @@
   margin-bottom: 20px;
 }
 
-/* Restore ad form back to its place */
+/* Ad form styling */
 .ad-form-card {
   margin-bottom: 24px;
+  background: linear-gradient(135deg, rgba(30,41,59,0.8), rgba(15,23,42,0.95));
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ad-form-card .card-header {
+  padding: 16px 20px;
+  background: rgba(30, 41, 59, 0.7);
+  border-bottom: 1px solid rgba(71, 85, 105, 0.2);
+}
+
+.ad-form-card .card-content {
+  padding: 20px;
+}
+
+/* Form styling */
+.form-control {
+  background-color: rgba(30, 41, 59, 0.5);
+  border-color: rgba(71, 85, 105, 0.5);
+  color: #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.form-control:focus {
+  background-color: rgba(30, 41, 59, 0.7);
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 240px;
+  }
+  
+  .content-wrapper {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid #2a2e3c;
+  }
+  
+  .dashboard-cards {
+    grid-template-columns: repeat(auto-fit, minmax(100%, 1fr));
+  }
 }
