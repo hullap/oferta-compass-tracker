@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from "react";
 import { Offer } from "@/types/offer";
 import Header from "@/components/Header";
@@ -6,7 +5,7 @@ import OfferCard from "@/components/OfferCard";
 import OfferDetails from "@/components/OfferDetails";
 import NewOfferForm from "@/components/NewOfferForm";
 import { Input } from "@/components/ui/input";
-import { Search, LayoutGrid, LayoutList, Star, Archive as ArchiveIcon, RefreshCcw, ArrowUpDown, TrendingUp, Calendar, Hash, Tag, Filter } from "lucide-react";
+import { Search, LayoutGrid, LayoutList, Star, Archive as ArchiveIcon, RefreshCcw, ArrowUpDown, TrendingUp, Calendar, Hash, Tag, Filter, BarChart4 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu,
@@ -72,7 +71,7 @@ const Index = () => {
     archiveOffer,
     deleteOffer,
     refreshOffers
-  } = useOffers(refreshTimestamp);
+  } = useOffers();
 
   // Filtragem das ofertas com base no termo de busca e filtros avançados
   const filteredOffers = offers.filter(offer => {
@@ -182,7 +181,7 @@ const Index = () => {
     toast.success("Dados atualizados com sucesso!");
   };
 
-  // Handler to refresh card data (fixed to remove parameter)
+  // Handler to refresh card data
   const handleRefreshOffer = () => {
     // Just update the timestamp to force recalculation of scores
     toast.success("Dados da oferta atualizados!");
@@ -202,6 +201,38 @@ const Index = () => {
   // Gerar uma lista de todas as tags únicas para filtros
   const allTags = [...new Set(offers.flatMap(o => o.keywords || []))];
 
+  // Get dashboard stats
+  const getDashboardStats = () => {
+    const total = offers.length;
+    const active = offers.filter(o => !archivedOffers.has(o.id)).length;
+    const favorite = offers.filter(o => favoriteOffers.has(o.id)).length;
+    const pinned = offers.filter(o => pinnedOffers.has(o.id)).length;
+    
+    return {
+      total,
+      active,
+      favorite,
+      pinned
+    };
+  };
+  
+  const stats = getDashboardStats();
+  
+  // Get offers by score category
+  const getOffersByScore = () => {
+    const high = offers.filter(o => calculateScore(o).value >= 70).length;
+    const medium = offers.filter(o => calculateScore(o).value >= 40 && calculateScore(o).value < 70).length;
+    const low = offers.filter(o => calculateScore(o).value < 40).length;
+    
+    return {
+      high,
+      medium,
+      low
+    };
+  };
+  
+  const scoreStats = getOffersByScore();
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header 
@@ -212,7 +243,7 @@ const Index = () => {
         onRefreshData={handleRefreshData}
       />
       
-      <main className="flex-1 container py-6 px-4">
+      <main className="content-wrapper">
         {isCreatingOffer ? (
           <NewOfferForm 
             onSubmit={handleAddOffer} 
@@ -231,8 +262,75 @@ const Index = () => {
           />
         ) : (
           <div className="space-y-6">
-            <div className="flex flex-wrap justify-between items-center gap-3">
-              <h2 className="text-2xl font-bold">Ofertas</h2>
+            <div className="content-header">
+              <h2 className="text-2xl font-bold">Dashboard de Ofertas</h2>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  onClick={() => {
+                    setSelectedOffer(null);
+                    setIsCreatingOffer(true);
+                  }}
+                  className="bg-indigo-600 hover:bg-indigo-700"
+                >
+                  Nova Oferta
+                </Button>
+                
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="border-gray-700 hover:border-blue-500"
+                  onClick={handleRefreshData}
+                  title="Atualizar dados"
+                >
+                  <RefreshCcw size={18} />
+                </Button>
+              </div>
+            </div>
+            
+            {/* Dashboard Cards */}
+            <div className="dashboard-cards">
+              <div className="dashboard-card card-purple">
+                <div className="text-sm opacity-80">Total de Ofertas</div>
+                <div className="headline-value">{stats.active}</div>
+                <div className="text-xs opacity-70">
+                  {stats.total} no total • {stats.archived} arquivadas
+                </div>
+              </div>
+              
+              <div className="dashboard-card card-pink">
+                <div className="text-sm opacity-80">Ofertas Favoritas</div>
+                <div className="headline-value">{stats.favorite}</div>
+                <div className="text-xs opacity-70">
+                  {((stats.favorite / stats.total) * 100).toFixed(1)}% do total
+                </div>
+              </div>
+              
+              <div className="dashboard-card card-teal">
+                <div className="text-sm opacity-80">Ofertas Fixadas</div>
+                <div className="headline-value">{stats.pinned}</div>
+                <div className="text-xs opacity-70">
+                  {((stats.pinned / stats.total) * 100).toFixed(1)}% do total
+                </div>
+              </div>
+              
+              <div className="dashboard-card card-orange">
+                <div className="text-sm opacity-80">Score das Ofertas</div>
+                <div className="headline-value flex items-center">
+                  <span className="text-green-300 mr-2">{scoreStats.high}</span>
+                  <span className="text-yellow-300 mr-2">{scoreStats.medium}</span>
+                  <span className="text-red-300">{scoreStats.low}</span>
+                </div>
+                <div className="text-xs opacity-70">
+                  Bom • Médio • Baixo
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+              <h3 className="text-xl font-bold flex items-center">
+                <BarChart4 className="mr-2" size={20} />
+                Suas Ofertas
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {/* Controles de visualização */}
                 <div className="flex items-center">

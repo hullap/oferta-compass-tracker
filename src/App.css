@@ -5,3 +5,79 @@
   padding: 0;
   text-align: left;
 }
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 240px;
+  background-color: #1a2035;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex: 1;
+  background-color: #131b30;
+  padding: 0;
+}
+
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dashboard-card {
+  border-radius: 8px;
+  padding: 20px;
+  color: white;
+}
+
+.card-purple {
+  background: linear-gradient(45deg, #5e35b1, #9575cd);
+}
+
+.card-pink {
+  background: linear-gradient(45deg, #e91e63, #f48fb1);
+}
+
+.card-teal {
+  background: linear-gradient(45deg, #00897b, #4db6ac);
+}
+
+.card-orange {
+  background: linear-gradient(45deg, #f57c00, #ffb74d);
+}
+
+.headline-value {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.trend-indicator {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  margin-left: 8px;
+}
+
+.content-wrapper {
+  padding: 24px;
+}
+
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Restore ad form back to its place */
+.ad-form-card {
+  margin-bottom: 24px;
+}

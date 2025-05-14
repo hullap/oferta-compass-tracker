@@ -187,8 +187,8 @@ const OfferDetails = ({
         </div>
       )}
 
-      {/* Ad Data Form at the top for easy access */}
-      <Card className="border border-gray-800 card-gradient bg-gradient-to-br from-indigo-950/30 to-slate-900">
+      {/* Ad Data Form - back to its original position */}
+      <Card className="border border-gray-800 card-gradient bg-gradient-to-br from-indigo-950/30 to-slate-900 ad-form-card">
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <ChartBar size={18} className="text-blue-400" />

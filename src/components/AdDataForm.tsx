@@ -1,13 +1,12 @@
 
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "./ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { CalendarIcon, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -46,79 +45,75 @@ const AdDataForm = ({ offerId, offerName, onSave, initialObservation = "", initi
   };
   
   return (
-    <Card className="border border-gray-800 card-gradient">
-      <CardHeader>
-        <CardTitle className="text-base">Registrar anúncios para {offerName}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="activeAds">Anúncios ativos</Label>
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="activeAds">Anúncios ativos</Label>
+          <Input
+            id="activeAds"
+            type="number"
+            min="0"
+            placeholder="Quantidade de anúncios"
+            value={activeAds}
+            onChange={(e) => setActiveAds(e.target.value)}
+            className="border-gray-700"
+            required
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label>Data do registro</Label>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal border-gray-700",
+                  !date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione uma data</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(newDate) => newDate && setDate(newDate)}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+        
+        <div className="space-y-2">
+          <Label>Hora do registro</Label>
+          <div className="relative">
             <Input
-              id="activeAds"
-              type="number"
-              min="0"
-              placeholder="Quantidade de anúncios"
-              value={activeAds}
-              onChange={(e) => setActiveAds(e.target.value)}
-              className="border-gray-700"
-              required
+              type="time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="border-gray-700 pl-9"
             />
+            <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="observation">Observações do dia</Label>
-            <Textarea
-              id="observation"
-              placeholder="Observações sobre os anúncios deste dia"
-              value={observation}
-              onChange={(e) => setObservation(e.target.value)}
-              className="border-gray-700 min-h-[80px]"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label>Data e hora do registro</Label>
-            <div className="flex gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full justify-start text-left font-normal border-gray-700",
-                      !date && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP", { locale: ptBR }) : <span>Selecione uma data</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={(newDate) => newDate && setDate(newDate)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              
-              <div className="relative">
-                <Input
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="border-gray-700 pl-9"
-                />
-                <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              </div>
-            </div>
-          </div>
-          
-          <Button type="submit" className="w-full">Registrar</Button>
-        </form>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="observation">Observações do dia</Label>
+        <Textarea
+          id="observation"
+          placeholder="Observações sobre os anúncios deste dia"
+          value={observation}
+          onChange={(e) => setObservation(e.target.value)}
+          className="border-gray-700 min-h-[80px]"
+        />
+      </div>
+      
+      <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">Registrar</Button>
+    </form>
   );
 };
 
